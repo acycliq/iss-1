@@ -1,4 +1,4 @@
-function out = stageViewer()
+function out = stageViewer(o, Roi)
 
 SpotGeneName = o.GeneNames(o.SpotCodeNo);
 uGenes = unique(SpotGeneName);

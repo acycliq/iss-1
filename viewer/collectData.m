@@ -17,6 +17,7 @@ nbPror = mat2cell(pSpotNeighb, ones(size(pSpotNeighb,1),1), size(pSpotNeighb,2))
 
 
 [~, BestNeighb] = max(pSpotNeighb,[],2);
+nS = size(pSpotNeighb,1);
 SpotBestNeighb = bi(Neighbors,(1:nS)',BestNeighb(:));
 
 mySpots = [num2cell(o.SpotGlobalYX(IncludeSpot,:)), num2cell(SpotBestNeighb), nb, nbPror];

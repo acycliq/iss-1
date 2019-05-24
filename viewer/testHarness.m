@@ -3,9 +3,9 @@
 %%%%%
 
 
-load(".\cachedData\oSegment_dapi_left_170315_161220KI_4_3.mat")
-load('.\cachedData\CellMap.mat')
-load('.\cachedData\gSetCA1all.mat')
+load(".\viewer\cachedData\oSegment_dapi_left_170315_161220KI_4_3.mat")
+load('.\viewer\cachedData\CellMap.mat')
+load('.\viewer\cachedData\gSetCA1all.mat')
 
 
 % Manual overrides
