@@ -1,13 +1,23 @@
-function collectData(GeneNames, ClassNames, pCellClass, CellGeneCount, CellYX, o, IncludeSpot, Neighbors, pSpotNeighb)
+function collectData(stagingData, o)
+
+allSpots = stagingData.allSpots;
+GeneNames = stagingData.GeneNames;
+ClassNames = stagingData.ClassNames; 
+pCellClass = stagingData.pCellClass; 
+CellGeneCount = stagingData.CellGeneCount;
+CellYX = stagingData.CellYX;
+IncludeSpot = stagingData.IncludeSpot;
+Neighbors = stagingData.Neighbors;
+pSpotNeighb = stagingData.pSpotNeighb;
 
 % 1. Collect the cells and their locations
 collectCells(GeneNames, ClassNames, pCellClass, CellGeneCount, CellYX)
 
 % 2. Collect all spots and their locations, and for a specific subset, get
 % the cell they have been asigned to.
-load('allSpots.mat')
-fprintf('%s: allSpots.mat loaded\n', datestr(now))
-% allSpots = allSpots(ismember(allSpots(:,1), GeneNames), :);
+% load('allSpots.mat')
+% fprintf('%s: allSpots.mat loaded\n', datestr(now))
+% % allSpots = allSpots(ismember(allSpots(:,1), GeneNames), :);
 
 % for each spot, concatenate all its Neighbors into a single column
 nb = mat2cell(Neighbors, ones(size(Neighbors,1),1), size(Neighbors,2));
