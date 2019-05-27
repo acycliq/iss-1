@@ -192,7 +192,16 @@ for i=1:o.CellCallMaxIter
     
     %% diagnostics
     if ~isempty(o.CellCallShowCenter) && (Converged || o.Graphics==2 || i==o.CellCallMaxIter)
-        stageViewer(o, [x0 x1 y0 y1])
+        stagingData.GeneNames = GeneNames;
+        stagingData.ClassNames = ClassNames; 
+        stagingData.pCellClass = pCellClass;
+        stagingData.CellGeneCount = CellGeneCount;
+        stagingData.CellYX = CellYX;
+        stagingData.IncludeSpot = IncludeSpot;
+        stagingData.Neighbors = Neighbors;
+        stagingData.pSpotNeighb = pSpotNeighb;
+        stagingData.Roi = [x0 x1 y0 y1];
+        stageViewer(o, stagingData)
         
         figure(3985471)
         
@@ -204,8 +213,6 @@ for i=1:o.CellCallMaxIter
         [~, BestNeighb] = max(pSpotNeighb,[],2);
         SpotBestNeighb = bi(Neighbors,(1:nS)',BestNeighb(:));
         rn = SpotBestNeighb<nC & max(abs(SpotYX-o.CellCallShowCenter),[],2)<o.CellCallShowRad;
-        
-        collectData(GeneNames, ClassNames, pCellClass, CellGeneCount, CellYX, o, IncludeSpot, Neighbors, pSpotNeighb);
         
         plot([SpotYX(rn,2) , CellYX(SpotBestNeighb(rn),2)]', ...
             [SpotYX(rn,1) , CellYX(SpotBestNeighb(rn),1)]', 'Color', [.3 .3 .3]);
