@@ -4,7 +4,7 @@
 
 
 load(".\cachedData\oSegment_dapi_left_170315_161220KI_4_3.mat")
-load('.\cachedData\CellMap.mat')
+% load('.\cachedData\CellMap.mat')
 load('.\cachedData\gSetCA1all.mat')
 
 
