@@ -41,7 +41,7 @@ cmdStr = ['.\vips\bin\vips.exe gravity ' bigImg ' ' tilesFolder '[layout=google,
 system(cmdStr);
 fprintf('%s: Done! \n', datestr(now));
 
-system ('java -jar ./jar/SimpleWebServer.jar')
+system ('javaw -jar ./jar/SimpleWebServer.jar')
 dos('start http://localhost:80/');
 
         
