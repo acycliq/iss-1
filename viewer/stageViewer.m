@@ -19,7 +19,7 @@ scaleFactor = 32768/max(xRange, yRange);
 % first scale up the image
 dim = 32768;
 bigImg = [num2str(dim), 'px.tif'];
-tilesFolder = [num2str(dim), 'px.dz'];
+tilesFolder = ['.\dashboard\data\img\', num2str(dim), 'px.dz'];
 fprintf('%s: Upscaling the image \n', datestr(now));
 cmdStr = ['.\vips\bin\vips.exe'  ' resize ' img ' ' bigImg ' ' num2str(scaleFactor, 9), ' --kernel nearest' ];
 system(cmdStr);
