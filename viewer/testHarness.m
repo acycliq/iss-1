@@ -12,6 +12,6 @@ load('.\cachedData\gSetCA1all.mat')
 [m, ~, n] = size(o.cSpotColors);
 o.cAnchorIntensities = (o.DetectionThresh+1) * ones(m,n);
 o.GeneNames(strcmp(o.GeneNames, 'Lphn2')) = {'Adgrl2'};
-% o.CellMapFile = '..\viewer\cachedData\CellMap.mat';
+o.CellMapFile = '..\viewer\cachedData\CellMap.mat';
 
 o = o.call_cells(gSet, DapiBoundaries);
