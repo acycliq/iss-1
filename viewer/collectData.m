@@ -49,7 +49,7 @@ T.Properties.VariableNames = {'Gene','Expt','y','x','neighbour','neighbour_array
 % writetable(T, str);
 
 jsonStr = jsonencode(T);
-str = ['Dapi_overlays.json'];
+str = ['.\dashboard\data\json\Dapi_overlays.json'];
 fid = fopen(str, 'w');
 if fid == -1, error('Cannot create JSON file'); end
 fwrite(fid, jsonStr, 'char');
@@ -83,7 +83,7 @@ VariableNames = {'Cell_Num','Y','X','Genenames','CellGeneCount','ClassName','Pro
 T = cell2table(df, 'VariableNames',VariableNames);
 
 jsonStr = jsonencode(T);
-str = ['iss.json']; 
+str = ['.\dashboard\data\json\iss.json']; 
 fid = fopen(str, 'w');
 if fid == -1, error('Cannot create JSON file'); end
 fwrite(fid, jsonStr, 'char');
