@@ -1,6 +1,6 @@
 function dapi(config) {
 
-    var img = config.imageSize;
+    var img = [config.imageSize.width, config.imageSize.height];
     // var img = [
     //     65536, // original width of image
     //     47168 // original height of image
@@ -82,7 +82,7 @@ function dapi(config) {
 
     // The transformation in this CRS maps the the bottom left corner to (0,0) and the top right to (256, 256)
     L.CRS.MySimple = L.extend({}, L.CRS.Simple, {
-        transformation: new L.Transformation(1 / 64, 0, -1 / 64, 256),
+        transformation: new L.Transformation(1 / 128, 0, -1 / 128, 256),
     });
 
     var yx = L.latLng;
