@@ -48,8 +48,11 @@ roiStruct.y1 = Roi(4);
 saveJSONfile(roiStruct, '.\dashboard\data\json\roi.json')
 
 % launch now the viewer
-system ('start http://localhost:80')
-system ('java -jar ./jar/SimpleWebServer.jar')
+% system ('start http://localhost:8080')
+system ('start chrome http://localhost:8080')
+% system ('java -jar ./jar/SimpleWebServer.jar')
+system ('java -jar ./jar/nanoSimpleWWW.jar')
+
 
         
 
