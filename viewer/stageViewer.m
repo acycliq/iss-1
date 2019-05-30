@@ -25,12 +25,29 @@ cmdStr = ['.\vips\bin\vips.exe'  ' resize ' img ' ' bigImg ' ' num2str(scaleFact
 system(cmdStr);
 fprintf('%s: Done! \n', datestr(now));
 
+% read the dimensions of the scaled image
+cmdStr = ['.\vips\bin\vipsheader.exe -f height ', bigImg];
+[status, h] = system(cmdStr);
+cmdStr = ['.\vips\bin\vipsheader.exe -f width ', bigImg];
+[status, w] = system(cmdStr);
+imageStruct.height = str2double(h);
+imageStruct.width =  str2double(w);
+saveJSONfile(imageStruct, '.\dashboard\data\json\imageSize.json')
+
 %now make the tiles
 fprintf('%s: Started doing the pyramid of tiles \n', datestr(now));
 cmdStr = ['.\vips\bin\vips.exe gravity ' bigImg ' ' tilesFolder '[layout=google,suffix=.png,skip_blanks=0] south-west ' num2str(dim) ' ' num2str(dim) ' --extend black'];
 system(cmdStr);
 fprintf('%s: Done! \n', datestr(now));
 
+% save the roi as a json file
+roiStruct.x0 = Roi(1);
+roiStruct.x1 = Roi(2);
+roiStruct.y0 = Roi(3);
+roiStruct.y1 = Roi(4);
+saveJSONfile(roiStruct, '.\dashboard\data\json\roi.json')
+
+% launch now the viewer
 system ('start http://localhost:80')
 system ('java -jar ./jar/SimpleWebServer.jar')
 
