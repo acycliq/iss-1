@@ -1,6 +1,13 @@
 function out = stageViewer(o, stagingData)
 img = '.\img\background_boundaries.tif'
 
+% rename the subclasses PC.CA2 and PC.CA3 to PC.Other1 and PC.Other2 
+isPC.CA2 = strcmp(stagingData.ClassNames, 'PC.CA2');
+stagingData.ClassNames{isPC.CA2} = 'PC.Other1';
+
+isPC.CA3 = strcmp(stagingData.ClassNames, 'PC.CA3');
+stagingData.ClassNames{isPC.CA3} = 'PC.Other2';
+
 cd = cleanData(o, stagingData);
 uGenes = cd.uGenes;
 PlotSpots = cd.PlotSpots;
