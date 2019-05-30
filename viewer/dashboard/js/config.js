@@ -4,11 +4,11 @@ function config(){
     var ini = [
         {
             name: '98 gene panel',
-            roi: {x0: 6150, x1: 13751, y0: 12987, y1: 18457},
-            imageSize: [16384, 11791],
-            cellData: './dashboard/data/img/default_98genes/json/iss.json',
-            geneData: './dashboard/data/img/default_98genes/json/Dapi_overlays.json',
-            tiles: './dashboard/data/img/default_98genes/16384px/{z}/{x}/{y}.png'
+            roi: './dashboard/data/json/roi.json',
+            imageSize: './dashboard/data/json/imageSize.json',
+            cellData: './dashboard/data/json/iss.json',
+            geneData: './dashboard/data/json/Dapi_overlays.json',
+            tiles: './dashboard/data/img/32768px/{z}/{y}/{x}.png'
         },
 
         {
