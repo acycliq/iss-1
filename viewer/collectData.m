@@ -1,14 +1,14 @@
-function collectData(stagingData, o)
+function collectData(o, myData, cellCallData)
 
-allSpots = stagingData.allSpots;
-GeneNames = stagingData.GeneNames;
-ClassNames = stagingData.ClassNames; 
-pCellClass = stagingData.pCellClass; 
-CellGeneCount = stagingData.CellGeneCount;
-CellYX = stagingData.CellYX;
-IncludeSpot = stagingData.IncludeSpot;
-Neighbors = stagingData.Neighbors;
-pSpotNeighb = stagingData.pSpotNeighb;
+allSpots = myData.allSpots;
+GeneNames = myData.GeneNames;
+ClassNames = myData.ClassNames; 
+pCellClass = cellCallData.pCellClass; 
+CellGeneCount = cellCallData.CellGeneCount;
+CellYX = myData.CellYX;
+IncludeSpot = myData.IncludeSpot;
+Neighbors = cellCallData.Neighbors;
+pSpotNeighb = cellCallData.pSpotNeighb;
 
 % 1. Collect the cells and their locations
 collectCells(GeneNames, ClassNames, pCellClass, CellGeneCount, CellYX)

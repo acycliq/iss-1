@@ -1,26 +1,26 @@
-function out = stageViewer(o, stagingData)
+function out = stageViewer(o, myData, cellCallData)
 img = '.\img\background_boundaries.tif'
 
 % get the name of the folder where viewer lives in
 viewerRoot = fileparts(which(mfilename));
 
 % rename the subclasses PC.CA2 and PC.CA3 to PC.Other1 and PC.Other2 
-isPC.CA2 = strcmp(stagingData.ClassNames, 'PC.CA2');
-stagingData.ClassNames{isPC.CA2} = 'PC.Other1';
+isPC.CA2 = strcmp(myData.ClassNames, 'PC.CA2');
+myData.ClassNames{isPC.CA2} = 'PC.Other1';
 
-isPC.CA3 = strcmp(stagingData.ClassNames, 'PC.CA3');
-stagingData.ClassNames{isPC.CA3} = 'PC.Other2';
+isPC.CA3 = strcmp(myData.ClassNames, 'PC.CA3');
+myData.ClassNames{isPC.CA3} = 'PC.Other2';
 
-clndt = cleanData(o, stagingData);
+clndt = cleanData(o, myData);
 uGenes = clndt.uGenes;
 PlotSpots = clndt.PlotSpots;
 GeneNo = clndt.GeneNo;
 
-stagingData.allSpots = collectSpots(o, uGenes, PlotSpots, GeneNo);
+myData.allSpots = collectSpots(o, uGenes, PlotSpots, GeneNo);
 
-collectData(stagingData, o);
+collectData(o, myData, cellCallData);
 
-Roi = stagingData.Roi;
+Roi = myData.Roi;
 xRange = 1+Roi(2)-Roi(1);
 yRange = 1+Roi(4)-Roi(3);
 scaleFactor = 32768/max(xRange, yRange);
@@ -82,9 +82,9 @@ system ('java -jar ./jar/nanoSimpleWWW.jar')
 end
 
 
-function out = cleanData(o, stagingData)
+function out = cleanData(o, myData)
 
-Roi = stagingData.Roi;
+Roi = myData.Roi;
 SpotGeneName = o.GeneNames(o.SpotCodeNo);
 uGenes = unique(SpotGeneName);
 
@@ -92,8 +92,8 @@ uGenes = unique(SpotGeneName);
 QualOK = o.quality_threshold;
 
 % now show only those in Roi
-if ~isempty(stagingData.Roi)
-    InRoi = all(o.SpotGlobalYX>=stagingData.Roi([3 1]) & o.SpotGlobalYX<=stagingData.Roi([4 2]),2);
+if ~isempty(myData.Roi)
+    InRoi = all(o.SpotGlobalYX>=myData.Roi([3 1]) & o.SpotGlobalYX<=myData.Roi([4 2]),2);
 else
     InRoi = true;
 end
