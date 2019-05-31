@@ -23,14 +23,14 @@ collectCells(GeneNames, ClassNames, pCellClass, CellGeneCount, CellYX)
 nb = mat2cell(Neighbors, ones(size(Neighbors,1),1), size(Neighbors,2));
 
 % and do the same for the corresponding probabilities
-nbPror = mat2cell(pSpotNeighb, ones(size(pSpotNeighb,1),1), size(pSpotNeighb,2));
+nbProb = mat2cell(pSpotNeighb, ones(size(pSpotNeighb,1),1), size(pSpotNeighb,2));
 
 
 [~, BestNeighb] = max(pSpotNeighb,[],2);
 nS = size(pSpotNeighb,1);
 SpotBestNeighb = bi(Neighbors,(1:nS)',BestNeighb(:));
 
-mySpots = [num2cell(o.SpotGlobalYX(IncludeSpot,:)), num2cell(SpotBestNeighb), nb, nbPror];
+mySpots = [num2cell(o.SpotGlobalYX(IncludeSpot,:)), num2cell(SpotBestNeighb), nb, nbProb];
 
 keyAllSpots = cellfun(@(y, x) sprintf('%.10f_%.10f', y,x), allSpots(:,3), allSpots(:,4), 'Uniform',0);
 keyMySpots = cellfun(@(y, x) sprintf('%.10f_%.10f', y,x), mySpots(:,1), mySpots(:,2), 'Uniform',0);
