@@ -1,0 +1,98 @@
+<html>
+<head>
+    <link rel="stylesheet"
+          href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.css" />
+</head>
+<body>
+    <div id="mymap" style="width: 700px; height: 700px"></div>
+
+    <!-- leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
+
+    <script>
+
+        var img = [
+            32768, // original width of image
+            23582 // original height of image
+        ];
+
+        var roi = { //range of interest
+            x0: 6150,
+            x1: 13751,
+            y0: 12987,
+            y1: 18457,
+        };
+
+        a = img[0] / (roi.x1 - roi.x0)
+        b = -img[0] / (roi.x1 - roi.x0) * roi.x0
+        c = img[1] / (roi.y1 - roi.y0)
+        d = -img[1] / (roi.y1 - roi.y0) * roi.y0
+
+        // This transformation maps a point in pixel dimensions to our user defined roi
+        var t = new L.Transformation(a, b, c, d);
+
+        L.CRS.MySimple = L.extend({}, L.CRS.Simple, {
+            // transformation: new L.Transformation(1 / 64, 0, 1 / 64, 0),
+            transformation: new L.Transformation(1 / 128, 0, -1 / 128, 256),
+        });
+
+        var yx = L.latLng;
+
+        var xy = function (x, y) {
+            if (L.Util.isArray(x)) { // When doing xy([x, y]);
+                return yx(x[1], x[0]);
+            }
+            return yx(y, x); // When doing xy(x, y);
+        };
+
+        var bounds = L.latLngBounds([
+            xy(0, 0),
+            xy(img)
+        ]);
+
+        var p = t.transform(L.point(img));
+
+        var map = L.map('mymap', {
+            crs: L.CRS.MySimple, // http://leafletjs.com/reference-1.0.3.html#map-crs
+            maxBounds: bounds.pad(.5), // http://leafletjs.com/reference-1.0.3.html#map-maxbounds
+            minZoom: 0,
+            maxZoom: 7,
+            attributionControl: false,
+        }).setView([img[1]/2, img[0]/2], 1);
+
+
+        var urlStr = 'dashboard/data/temp/32768px';
+        // var urlStr = 'viewer/32768px';
+        var tl = L.tileLayer(urlStr + '/{z}/{y}/{x}.png', {
+            attribution: 'KDH',
+            continuousWorld: false,
+            minZoom: 0,
+            noWrap: true
+        }).addTo(map);
+
+        // var center = L.marker([img[1]/2, img[0]/2]).addTo(map);
+        // center.bindPopup("<b>center marker</b>").openPopup();
+
+        var top_right = L.marker([img[0], img[0]]).addTo(map);
+        top_right.bindPopup("<b>Top Right: img[0], img[1]</b>").openPopup();
+
+        var bottom_left = L.marker([0, 0]).addTo(map);
+        bottom_left.bindPopup("<b>Bottom Left: 0, 0</b>").openPopup();
+
+        // var top_left = L.marker([img[1] - img[1], 0]).addTo(map);
+        // top_left.bindPopup("<b>Top Left: img[1], 0</b>").openPopup();
+        //
+        var bottom_right = L.marker([0, img[0]]).addTo(map);
+        bottom_right.bindPopup("<b>Bottom Right: 0, img[0]</b>").openPopup();
+
+        // var map = L.map('mymap').setView([0, 0], 2);
+        // L.tileLayer('dashboard/data/img/default_98genes/16384px/{z}/{x}/{y}.png', {
+        //     minZoom: 1,
+        //     maxZoom: 6,
+        //     tms: false,
+        //     noWrap: true
+        // }).addTo(map);
+    </script>
+</body>
+</html>
