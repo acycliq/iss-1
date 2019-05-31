@@ -74,7 +74,7 @@ saveJSONfile(roiStruct, [viewerRoot, '\dashboard\data\json\roi.json'])
 % system ('start http://localhost:8080')
 system ('start chrome http://localhost:8080')
 % system ('java -jar ./jar/SimpleWebServer.jar')
-system ('java -jar ./jar/nanoSimpleWWW.jar')
+system ('java -jar ./jar/nanoSimpleWWW.jar > log.txt')
 
 
         
