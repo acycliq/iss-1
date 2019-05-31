@@ -211,19 +211,10 @@
         </div>
     </div>
 
-    <!-- tab navigation -->
-    <ul class="nav nav-tabs" role="tablist" id="index-tabs" style="margin-top:-6px;">
-        <!-- nav bar left side: tabs -the map, table, about nav tabs, for content, see below -->
-        <li class="active"><a href="#map-content" data-toggle="tab" id="map-tab">Viewer</a></li>
-        <li><a href="#settings-content" data-toggle="tab" id="settings-tab">Settings</a></li>
-        <li><a href="#help-content" data-toggle="tab" id="help-tab">Help</a></li>
-    </ul>
 
-    <!-- content for the nav tabs -->
-    <div class="tab-content">
 
-        <!-- map content tab -->
-        <div class="tab-pane active fade in" id="map-content">
+    <!-- map content tab -->
+    <div class="tab-pane active fade in" id="map-content">
             <div class="container-fluid">
                 <div class="row" style="margin-top:5px">
                     <!--//top row-->
@@ -402,110 +393,6 @@
             </div>
         </div>
 
-
-        <!--settings tab-->
-        <div class="tab-pane fade" id="settings-content">
-            <div class="container-fluid">
-                <!--//top row-->
-                <div class="row" style="margin-top:5px">
-                    <div class="col-md-6" id="settings-img">
-                        <div class="chart-wrapper">
-                            <div class="chart-title">
-                                Data Sources
-                            </div>
-                            <div class="chart-stage">
-                                <div style="margin-top:10px;">
-                                    <span class="input-group-text">Localhost folder</span>
-                                    <input type="text" id="localhostPath" aria-label="First name" class="form-control" placeholder='Folder to be served...'>
-                                </div>
-
-                                <div style="margin-top:10px;">
-                                    <span class="input-group-text">Port Number</span>
-                                    <input type="text" id="portNumber" class="form-control" placeholder='Port number...'>
-                                </div>
-
-                                <div style="margin-top:10px;">
-                                    <span class="input-group-text">Path to the csv file</span>
-                                    <input type="text" id="csvPath" class="form-control" placeholder='Enter the csv path...'>
-                                </div>
-
-                                <div style="margin-top:10px;">
-                                    <span class="input-group-text">Path to the json file</span>
-                                    <input type="text" id="jsonPath" class="form-control" placeholder='Enter the json path...'>
-                                </div>
-
-                                <div style="margin-top:10px;">
-                                    <span class="input-group-text">ROI</span>
-                                    <input type="text" id="roi" class="form-control" placeholder='Enter the roi points...'>
-                                </div>
-
-                                <div style="margin-top:10px;">
-                                    <span class="input-group-text">Path to the tiles' root (Optional, plain black backround if path doesnt exist)</span>
-                                    <input type="text" id="tilesPath" class="form-control" placeholder='Enter the root path of the image tiles...'>
-                                </div>
-
-                                <div style="margin-top:10px; margin-bottom:20px">
-                                    <span class="input-group-text">Image size (in pixels)</span>
-                                    <input type="text" id="imageSize" class="form-control" placeholder='Enter the image size...'>
-                                </div>
-
-                                <button type="submit" id="submitBtn" class="btn btn-primary pull-right" enabled>Submit</button>
-                                <button type="reset" id = "resetBtn" class="btn btn-danger" style="margin-bottom:5px">Reset</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- settings tab -->
-
-        <!--help tab-->
-        <div class="tab-pane fade" id="help-content">
-            <div class="container-fluid">
-                <!--//top row-->
-                <div class="row" style="margin-top:5px">
-                    <div class="col-md-6" id="help-img">
-                        <div class="chart-wrapper">
-                            <div class="chart-title">
-                                Instructions
-                            </div>
-                            <div class="chart-stage">
-                                <ul>
-                                    <li>
-                                        <p>
-                                            You will need to start a server so that your data can be sent upstream. Otherwise the request will be rejected from the browser's security features.
-                                            To do that download <a href="https://github.com/acycliq/iss_viewer/blob/master/dashboard/scripts/serverCors.py" target="_blank"> this Python 3 script</a> save it
-                                            in a folder which sits higher in the fileystem to the folder where you keep you csv and json files. For example, if you have your data at C:\dev\temp\viewerData then
-                                            you need to save the python script at C:\dev\temp (or C:\dev or even C:)
-                                        </p>
-                                    </li>
-                                    <li>
-                                        <p>
-                                            cd now into the folder you downloaded the Python script open a command window and run it by `python serverCors.py 8888 &` Keep this command window open while you are using
-                                            the viewer. You have now started a simple http server which serves its current directory and all its subdirecories and contents and will allow the data to be sent across upon request.
-                                        </p>
-                                    </li>
-                                    <li>
-                                        <p>
-                                            Most of the input fields on the "Settings" tab are self-explanatory. The ROI has to be enter like in this example:
-                                            {"x0": 6150, "x1": 13751, "y0": 12987, "y1": 18457}.
-                                            Note the inner double quotes, the commas and the outer curly brackets!!!
-                                            Also the image size should be set as two numbers separated by a comma and then enclosed by a two squared brackets.
-                                            Hence, once properly set these two field should look like the screen below:
-                                        </p>
-                                        <svg width="860" height="250">
-                                            <image xlink:href="./dashboard//scripts/screen_2.png" width="100%" height="100%" x="0" y="0" />
-                                        </svg>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div><!-- tab-content -->
 
     <!--<hr>-->
 
