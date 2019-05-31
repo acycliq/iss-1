@@ -46,6 +46,8 @@ function dispatcher(userInputs){
 function run(c){
     var cellJson = c.cellData;
     var geneJson = c.geneData;
+    var roiJson = c.roi;
+    var imageSizeJson = c.imageSize;
 
     if (configSettings.name === '98 gene panel'){
         console.log('config is set to 98 gene panel')
@@ -54,6 +56,8 @@ function run(c){
         d3.queue()
         .defer(d3.json, cellJson)
         .defer(d3.json, geneJson)
+        .defer(d3.json, roiJson)
+        .defer(d3.json, imageSizeJson)
         .await(splitCharts(c))
     }
     else {
@@ -71,6 +75,12 @@ function splitCharts(myParam) {
 
         cellData = args[0];
         geneData = args[1];
+        // roiData = args[2];
+        // imageSizeData = args[3];
+
+        // not sure if this the best way to do this
+        myParam.roi = args[2];
+        myParam.imageSize = args[3];
 
         for (i = 0; i < cellData.length; ++i) {
             // make sure Prob and ClassName are arrays
