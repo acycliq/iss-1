@@ -1,15 +1,18 @@
 function out = stageViewer(o, myData, cellCallData)
 img = '.\img\background_boundaries.tif'
+% img = '\\basket.cortexlab.net\data\kenneth\iss\170315_161220KI_4-3\Output\background_image.tif'
 
 % get the name of the folder where viewer lives in
 viewerRoot = fileparts(which(mfilename));
 
-% rename the subclasses PC.CA2 and PC.CA3 to PC.Other1 and PC.Other2 
-isPC.CA2 = strcmp(myData.ClassNames, 'PC.CA2');
-myData.ClassNames{isPC.CA2} = 'PC.Other1';
+if any((strcmp(fieldnames(myData), 'ClassNames')))
+    % rename the subclasses PC.CA2 and PC.CA3 to PC.Other1 and PC.Other2 
+    isPC.CA2 = strcmp(myData.ClassNames, 'PC.CA2');
+    myData.ClassNames{isPC.CA2} = 'PC.Other1';
 
-isPC.CA3 = strcmp(myData.ClassNames, 'PC.CA3');
-myData.ClassNames{isPC.CA3} = 'PC.Other2';
+    isPC.CA3 = strcmp(myData.ClassNames, 'PC.CA3');
+    myData.ClassNames{isPC.CA3} = 'PC.Other2';
+end
 
 clndt = cleanData(o, myData);
 uGenes = clndt.uGenes;
@@ -18,7 +21,14 @@ GeneNo = clndt.GeneNo;
 
 myData.allSpots = collectSpots(o, uGenes, PlotSpots, GeneNo);
 
-collectData(o, myData, cellCallData);
+
+if nargin == 3
+    collectData(o, myData, cellCallData);
+elseif nargin == 2
+    collectData(o, myData);
+else 
+    error('I shouldnt be here..')
+end
 
 Roi = myData.Roi;
 xRange = 1+Roi(2)-Roi(1);
@@ -30,6 +40,10 @@ scaleFactor = 32768/max(xRange, yRange);
 dim = 32768;
 bigImg = [num2str(dim), 'px.tif'];
 % tilesFolder = ['.\dashboard\data\img\', num2str(dim), 'px.dz'];
+
+
+% do a santity check before start upscaling the image 
+sanityCheck(img, Roi)
 
 fprintf('%s: Upscaling the image \n', datestr(now));
 vipsExe = fullfile(viewerRoot, 'vips', 'bin', 'vips.exe');
@@ -106,4 +120,31 @@ out.PlotSpots = PlotSpots;
 out.GeneNo = GeneNo;
 
 end
+
+
+function sanityCheck(img, roi)
+viewerRoot = fileparts(which(mfilename));
+vipsheaderExe = fullfile(viewerRoot, 'vips', 'bin', 'vipsheader.exe');
+vipsheaderExe = ['"', vipsheaderExe '"'];
+
+% get the image dimensions from the tif
+cmdStr = [vipsheaderExe, ' -f height ', img];
+[~, hImg] = system(cmdStr);
+hImg = str2double(hImg);
+
+cmdStr = [vipsheaderExe, ' -f width ', img];
+[~, wImg] = system(cmdStr);
+wImg = str2double(wImg);
+
+% get the image dimensions as infered by the roi
+dimRoi = diff(roi) + 1;
+hRoi = dimRoi(3);
+wRoi = dimRoi(1);
+
+if (hRoi ~= hImg) || (wRoi ~= wImg)
+    error('The ROI implies an image of dimension %d by %d whereas the image is %d by %d pixels', wRoi, hRoi, wImg, hImg)
+end
+
+end
+
 
