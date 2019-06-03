@@ -1,5 +1,61 @@
 function collectData(o, myData, cellCallData)
 
+if nargin == 2
+    twoArgs(o, myData)
+elseif nargin == 3
+    threeArgs(o, myData, cellCallData)
+else
+    disp('Hello')
+end
+
+end
+
+
+function twoArgs(o, myData)
+
+[m,~] = size(myData.CellYX);
+for i=1:m
+    df{i,1} = i;
+    df{i,2} = myData.CellYX(i,1);
+    df{i,3} = myData.CellYX(i,2);
+
+    df{i,4} = {};
+    df{i,5} = {};
+    
+    df{i,6} = {};
+    df{i,7} = {};
+    
+end
+
+VariableNames = {'Cell_Num','Y','X','Genenames','CellGeneCount','ClassName','Prob'};
+T = cell2table(df, 'VariableNames',VariableNames);
+
+jsonStr = jsonencode(T);
+str = ['.\dashboard\data\json\iss.json']; 
+fid = fopen(str, 'w');
+if fid == -1, error('Cannot create JSON file'); end
+fwrite(fid, jsonStr, 'char');
+fclose(fid);
+
+fprintf('%s: %s saved \n', datestr(now), str);
+
+nAs = size(myData.allSpots, 1);
+out = [myData.allSpots, num2cell(nan(nAs,1))];
+% out(out(:,end)==0) = -1;
+
+T = cell2table(out);
+T.Properties.VariableNames = {'Gene','Expt','y','x','neighbour' };
+str = ['.\dashboard\data\json\Dapi_overlays.csv']; 
+writetable(T, str);
+
+fprintf('%s: %s saved. \n', datestr(now), str);
+
+
+end
+
+
+function threeArgs(o, myData, cellCallData)
+
 allSpots = myData.allSpots;
 GeneNames = myData.GeneNames;
 ClassNames = myData.ClassNames; 
@@ -13,41 +69,27 @@ pSpotNeighb = cellCallData.pSpotNeighb;
 % 1. Collect the cells and their locations
 collectCells(GeneNames, ClassNames, pCellClass, CellGeneCount, CellYX)
 
-% for each spot, concatenate all its Neighbors into a single column
-nb = mat2cell(Neighbors, ones(size(Neighbors,1),1), size(Neighbors,2));
-
-% and do the same for the corresponding probabilities
-nbProb = mat2cell(pSpotNeighb, ones(size(pSpotNeighb,1),1), size(pSpotNeighb,2));
-
-
+% 2. Find the best neighbour
 [~, BestNeighb] = max(pSpotNeighb,[],2);
-nS = size(pSpotNeighb,1);
+nS = size(Neighbors, 1);
 SpotBestNeighb = bi(Neighbors,(1:nS)',BestNeighb(:));
 
-mySpots = [num2cell(o.SpotGlobalYX(IncludeSpot,:)), num2cell(SpotBestNeighb), nb, nbProb];
+mySpots = [o.SpotGlobalYX(IncludeSpot,:), SpotBestNeighb];
 
 keyAllSpots = cellfun(@(y, x) sprintf('%.10f_%.10f', y,x), allSpots(:,3), allSpots(:,4), 'Uniform',0);
-keyMySpots = cellfun(@(y, x) sprintf('%.10f_%.10f', y,x), mySpots(:,1), mySpots(:,2), 'Uniform',0);
+keyMySpots = cellfun(@(y, x) sprintf('%.10f_%.10f', y,x), num2cell(mySpots(:,1)), num2cell(mySpots(:,2)), 'Uniform',0);
 
 [~, ia, ib] = intersect(keyAllSpots, keyMySpots);
-res = num2cell(nan(size(allSpots,1),3));
-res(ia, :) = mySpots(ib, 3:end);
+res = nan(size(allSpots,1),1);
+res(ia) = mySpots(ib, 3);
 
-out = [allSpots, res];
+out = [allSpots, num2cell(res)];
 % out(out(:,end)==0) = -1;
 
 T = cell2table(out);
-% % T.Properties.VariableNames = {'Gene','Expt','y','x','neighbour' };
-T.Properties.VariableNames = {'Gene','Expt','y','x','neighbour','neighbour_array','neighbour_prob'};
-% str = [fName, '_sims_Dapi_overlays.csv']; 
-% writetable(T, str);
-
-jsonStr = jsonencode(T);
-str = ['.\dashboard\data\json\Dapi_overlays.json'];
-fid = fopen(str, 'w');
-if fid == -1, error('Cannot create JSON file'); end
-fwrite(fid, jsonStr, 'char');
-fclose(fid);
+T.Properties.VariableNames = {'Gene','Expt','y','x','neighbour' };
+str = ['.\dashboard\data\json\Dapi_overlays.csv']; 
+writetable(T, str);
 
 fprintf('%s: %s saved. \n', datestr(now), str);
 

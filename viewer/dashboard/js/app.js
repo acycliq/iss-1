@@ -55,7 +55,7 @@ function run(c){
         console.log('geneJson is' + geneJson)
         d3.queue()
         .defer(d3.json, cellJson)
-        .defer(d3.json, geneJson)
+        .defer(d3.csv, geneJson)
         .defer(d3.json, roiJson)
         .defer(d3.json, imageSizeJson)
         .await(splitCharts(c))

@@ -7,7 +7,7 @@ function config(){
             roi: './dashboard/data/json/roi.json',
             imageSize: './dashboard/data/json/imageSize.json',
             cellData: './dashboard/data/json/iss.json',
-            geneData: './dashboard/data/json/Dapi_overlays.json',
+            geneData: './dashboard/data/json/Dapi_overlays.csv',
             tiles: './dashboard/data/img/32768px/{z}/{y}/{x}.png'
         },
 
