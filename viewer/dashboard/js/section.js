@@ -219,10 +219,10 @@ function dataManager(sectionFeatures, data) {
             x: data[i].x,
             y: data[i].y,
             GeneCountTotal: data[i].CellGeneCount.reduce((a, b) => a + b, 0), //get the sum of all the elements in the array
-            IdentifiedType: agg[0].IdentifiedType,
-            color: agg[0].color,
-            Prob: agg[0].Prob,
-            renderOrder: sectionFeatures.renderOrder(agg[0].IdentifiedType),
+            IdentifiedType: agg[0]? agg[0].IdentifiedType: null,
+            color: agg[0]? agg[0].color: null,
+            Prob: agg[0]? agg[0].Prob: null,
+            renderOrder: agg[0]? sectionFeatures.renderOrder(agg[0].IdentifiedType): null,
 
         })
     }
