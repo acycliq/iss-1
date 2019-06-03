@@ -1,9 +1,9 @@
 function collectData(o, myData, cellCallData)
 
 if nargin == 2
-    twoArgs(o, myData)
+    helper_1ite(myData)
 elseif nargin == 3
-    threeArgs(o, myData, cellCallData)
+    helper(o, myData, cellCallData)
 else
     disp('Hello')
 end
@@ -11,7 +11,7 @@ end
 end
 
 
-function twoArgs(o, myData)
+function helper_1ite(myData)
 
 [m,~] = size(myData.CellYX);
 for i=1:m
@@ -27,34 +27,18 @@ for i=1:m
     
 end
 
-VariableNames = {'Cell_Num','Y','X','Genenames','CellGeneCount','ClassName','Prob'};
-T = cell2table(df, 'VariableNames',VariableNames);
-
-jsonStr = jsonencode(T);
-str = ['.\dashboard\data\json\iss.json']; 
-fid = fopen(str, 'w');
-if fid == -1, error('Cannot create JSON file'); end
-fwrite(fid, jsonStr, 'char');
-fclose(fid);
-
-fprintf('%s: %s saved \n', datestr(now), str);
-
 nAs = size(myData.allSpots, 1);
-out = [myData.allSpots, num2cell(nan(nAs,1))];
-% out(out(:,end)==0) = -1;
+arr = [myData.allSpots, num2cell(nan(nAs,1))];
 
-T = cell2table(out);
-T.Properties.VariableNames = {'Gene','Expt','y','x','neighbour' };
-str = ['.\dashboard\data\json\Dapi_overlays.csv']; 
-writetable(T, str);
-
-fprintf('%s: %s saved. \n', datestr(now), str);
-
+saveJson(df)
+saveCsv(arr)
 
 end
 
 
-function threeArgs(o, myData, cellCallData)
+
+
+function helper(o, myData, cellCallData)
 
 allSpots = myData.allSpots;
 GeneNames = myData.GeneNames;
@@ -83,17 +67,13 @@ keyMySpots = cellfun(@(y, x) sprintf('%.10f_%.10f', y,x), num2cell(mySpots(:,1))
 res = nan(size(allSpots,1),1);
 res(ia) = mySpots(ib, 3);
 
-out = [allSpots, num2cell(res)];
+arr = [allSpots, num2cell(res)];
 % out(out(:,end)==0) = -1;
 
-T = cell2table(out);
-T.Properties.VariableNames = {'Gene','Expt','y','x','neighbour' };
-str = ['.\dashboard\data\json\Dapi_overlays.csv']; 
-writetable(T, str);
-
-fprintf('%s: %s saved. \n', datestr(now), str);
+saveCsv(arr)
 
 end
+
 
 function collectCells(GeneNames, ClassNames, pCellClass, CellGeneCount, CellYX)
 % DN wrote this to get data for the viewer
@@ -115,6 +95,13 @@ for i=1:m
 end
 
 
+saveJson(df)
+
+end
+
+
+function saveJson(df)
+
 VariableNames = {'Cell_Num','Y','X','Genenames','CellGeneCount','ClassName','Prob'};
 T = cell2table(df, 'VariableNames',VariableNames);
 
@@ -126,6 +113,20 @@ fwrite(fid, jsonStr, 'char');
 fclose(fid);
 
 fprintf('%s: %s saved \n', datestr(now), str);
+
+end
+
+
+% out(out(:,end)==0) = -1;
+function saveCsv(arr)
+
+T = cell2table(arr);
+T.Properties.VariableNames = {'Gene','Expt','y','x','neighbour' };
+str = ['.\dashboard\data\json\Dapi_overlays.csv']; 
+writetable(T, str);
+
+fprintf('%s: %s saved. \n', datestr(now), str);
+
 
 end
 
