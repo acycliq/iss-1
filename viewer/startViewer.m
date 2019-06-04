@@ -9,13 +9,8 @@ myData.CellYX = getCellYX(o, myData);
 % get the name of the folder where viewer lives in
 viewerRoot = fileparts(which(mfilename));
 
-clndt = cleanData(o, myData.Roi);
-uGenes = clndt.uGenes;
-PlotSpots = clndt.PlotSpots;
-GeneNo = clndt.GeneNo;
-
+[uGenes, PlotSpots, GeneNo] = cleanData(o, myData.Roi);
 myData.allSpots = collectSpots(o, uGenes, PlotSpots, GeneNo);
-
 
 if nargin == 2
     collectData(o, myData, varargin{2});
@@ -41,9 +36,8 @@ bigImg = [num2str(dim), 'px.tif'];
 sanityCheck(img, Roi)
 
 % get the full path the the Vips executables
-myVips = vips(viewerRoot);
-vipsExe = myVips.exe;
-vipsheaderExe = myVips.headerExe;
+[vipsExe, vipsheaderExe] = vips(viewerRoot);
+
 
 fprintf('%s: Upscaling the image \n', datestr(now));
 cmdStr = [vipsExe,  ' resize ' img ' ' bigImg ' ' num2str(scaleFactor, 9), ' --kernel nearest' ];
@@ -98,7 +92,7 @@ saveJSONfile(roiStruct, [viewerRoot, '\dashboard\data\json\roi.json'])
 
 end
 
-function out = vips(viewerRoot)
+function [vipsExe, vipsheaderExe] = vips(viewerRoot)
 
 vipsExe = fullfile(viewerRoot, 'vips', 'bin', 'vips.exe');
 vipsExe = ['"', vipsExe '"'];
@@ -106,10 +100,10 @@ vipsExe = ['"', vipsExe '"'];
 vipsheaderExe = fullfile(viewerRoot, 'vips', 'bin', 'vipsheader.exe');
 vipsheaderExe = ['"', vipsheaderExe '"'];
 
-vips.exe = vipsExe;
-vips.headerExe = vipsheaderExe;
-
-out = vips;
+% vips.exe = vipsExe;
+% vips.headerExe = vipsheaderExe;
+% 
+% out = vips;
 end
 
 
@@ -146,7 +140,7 @@ end
 
 
 
-function out = cleanData(o, Roi)
+function [uGenes, PlotSpots, GeneNo] = cleanData(o, Roi)
 
 SpotGeneName = o.GeneNames(o.SpotCodeNo);
 uGenes = unique(SpotGeneName);
@@ -163,10 +157,6 @@ end
 
 PlotSpots = find(InRoi & QualOK);
 [~, GeneNo] = ismember(SpotGeneName(PlotSpots), uGenes);
-
-out.uGenes = uGenes;
-out.PlotSpots = PlotSpots;
-out.GeneNo = GeneNo;
 
 end
 
@@ -190,10 +180,7 @@ dimRoi = diff(roi) + 1;
 hRoi = dimRoi(3);
 wRoi = dimRoi(1);
 
-if (hRoi ~= hImg) || (wRoi ~= wImg)
-    error('The ROI implies an image of dimension %d by %d whereas the image is %d by %d pixels', wRoi, hRoi, wImg, hImg)
-end
-
+checkHelper(wRoi, hRoi, wImg, hImg, 'image')
 end
 
 
@@ -206,8 +193,14 @@ dimRoi = diff(roi) + 1;
 hRoi = dimRoi(3);
 wRoi = dimRoi(1);
 
+checkHelper(wRoi, hRoi, w, h, 'CellMap')
+end
+
+
+function checkHelper(wRoi, hRoi, w, h, label)
+
 if (hRoi ~= h) || (wRoi ~= w)
-    error('The ROI implies an image of dimension %d by %d whereas the CellMap is %d by %d pixels', wRoi, hRoi, w, h)
+    error('The ROI implies an image of dimension %d by %d whereas the %s is %d by %d pixels', wRoi, hRoi, label, w, h)
 end
 
 end
