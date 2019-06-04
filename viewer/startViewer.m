@@ -25,12 +25,9 @@ xRange = 1+Roi(2)-Roi(1);
 yRange = 1+Roi(4)-Roi(3);
 scaleFactor = 32768/max(xRange, yRange);
 
-% cmdStr = ['.\vips\bin\vips.exe'  ' resize '  '.\img\DapiBoundaries_161220KI_3-1_left.tif out.tif ', num2str(scaleFactor, 6) ]
 % first scale up the image
 dim = 32768;
 bigImg = [num2str(dim), 'px.tif'];
-% tilesFolder = ['.\dashboard\data\img\', num2str(dim), 'px.dz'];
-
 
 % do a santity check before start upscaling the image 
 sanityCheck(img, Roi)
