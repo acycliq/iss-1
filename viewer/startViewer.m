@@ -45,8 +45,6 @@ system(cmdStr);
 fprintf('%s: Done! \n', datestr(now));
 
 
-% save the image dimensions and the ROI to json files
-write2file(vipsheaderExe, bigImg, Roi, viewerRoot)
 
 %now make the tiles
 fprintf('%s: Started doing the pyramid of tiles \n', datestr(now));
@@ -61,6 +59,10 @@ tilesFolder = ['"', tilesFolder, '"'];
 cmdStr = [vipsExe, ' gravity ' bigImg ' ' [tilesFolder, '.dz'] '[layout=google,suffix=.png,skip_blanks=0] south-west ' num2str(dim) ' ' num2str(dim) ' --extend black'];
 system(cmdStr);
 fprintf('%s: Done! \n', datestr(now));
+
+
+% save the image dimensions and the ROI to json files
+write2file(vipsheaderExe, bigImg, Roi, viewerRoot)
 
 
 % launch now the viewer
