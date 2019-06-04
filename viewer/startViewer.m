@@ -1,4 +1,4 @@
-function out = stageViewer(varargin)
+function out = startViewer(varargin)
 img = '.\img\background_boundaries.tif'
 o = varargin{1};
 % img = '\\basket.cortexlab.net\data\kenneth\iss\170315_161220KI_4-3\Output\background_image.tif'
