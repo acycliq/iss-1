@@ -40,23 +40,19 @@ bigImg = [num2str(dim), 'px.tif'];
 % do a santity check before start upscaling the image 
 sanityCheck(img, Roi)
 
+% get the full path the the Vips executables
+myVips = vips(viewerRoot);
+vipsExe = myVips.exe;
+vipsheaderExe = myVips.headerExe;
+
 fprintf('%s: Upscaling the image \n', datestr(now));
-vipsExe = fullfile(viewerRoot, 'vips', 'bin', 'vips.exe');
-vipsExe = ['"', vipsExe '"'];
 cmdStr = [vipsExe,  ' resize ' img ' ' bigImg ' ' num2str(scaleFactor, 9), ' --kernel nearest' ];
 system(cmdStr);
 fprintf('%s: Done! \n', datestr(now));
 
-% read the dimensions of the scaled image
-vipsheaderExe = fullfile(viewerRoot, 'vips', 'bin', 'vipsheader.exe');
-vipsheaderExe = ['"', vipsheaderExe '"'];
-cmdStr = [vipsheaderExe, ' -f height ', bigImg];
-[status, h] = system(cmdStr);
-cmdStr = [vipsheaderExe, ' -f width ', bigImg];
-[status, w] = system(cmdStr);
-imageStruct.height = str2double(h);
-imageStruct.width =  str2double(w);
-saveJSONfile(imageStruct, [viewerRoot, '\dashboard\data\json\imageSize.json'])
+
+% save the image dimensions and the ROI to json files
+write2file(vipsheaderExe, bigImg, Roi, viewerRoot)
 
 %now make the tiles
 fprintf('%s: Started doing the pyramid of tiles \n', datestr(now));
@@ -88,6 +84,42 @@ system ('java -jar ./jar/nanoSimpleWWW.jar > log.txt')
 
         
 
+end
+
+
+function write2file(vipsheaderExe, bigImg, Roi, viewerRoot)
+
+% read the dimensions of the scaled image
+cmdStr = [vipsheaderExe, ' -f height ', bigImg];
+[status, h] = system(cmdStr);
+cmdStr = [vipsheaderExe, ' -f width ', bigImg];
+[status, w] = system(cmdStr);
+imageStruct.height = str2double(h);
+imageStruct.width =  str2double(w);
+saveJSONfile(imageStruct, [viewerRoot, '\dashboard\data\json\imageSize.json'])
+
+
+% save the roi as a json file
+roiStruct.x0 = Roi(1);
+roiStruct.x1 = Roi(2);
+roiStruct.y0 = Roi(3);
+roiStruct.y1 = Roi(4);
+saveJSONfile(roiStruct, [viewerRoot, '\dashboard\data\json\roi.json'])
+
+end
+
+function out = vips(viewerRoot)
+
+vipsExe = fullfile(viewerRoot, 'vips', 'bin', 'vips.exe');
+vipsExe = ['"', vipsExe '"'];
+
+vipsheaderExe = fullfile(viewerRoot, 'vips', 'bin', 'vipsheader.exe');
+vipsheaderExe = ['"', vipsheaderExe '"'];
+
+vips.exe = vipsExe;
+vips.headerExe = vipsheaderExe;
+
+out = vips;
 end
 
 
