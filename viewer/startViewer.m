@@ -68,21 +68,11 @@ cmdStr = [vipsExe, ' gravity ' bigImg ' ' [tilesFolder, '.dz'] '[layout=google,s
 system(cmdStr);
 fprintf('%s: Done! \n', datestr(now));
 
-% save the roi as a json file
-roiStruct.x0 = Roi(1);
-roiStruct.x1 = Roi(2);
-roiStruct.y0 = Roi(3);
-roiStruct.y1 = Roi(4);
-saveJSONfile(roiStruct, [viewerRoot, '\dashboard\data\json\roi.json'])
 
 % launch now the viewer
-% system ('start http://localhost:8080')
 system ('start chrome http://localhost:8080')
-% system ('java -jar ./jar/SimpleWebServer.jar')
 system ('java -jar ./jar/nanoSimpleWWW.jar > log.txt')
 
-
-        
 
 end
 
