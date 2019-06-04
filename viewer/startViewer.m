@@ -3,12 +3,8 @@ img = '.\img\background_boundaries.tif'
 o = varargin{1};
 % img = '\\basket.cortexlab.net\data\kenneth\iss\170315_161220KI_4-3\Output\background_image.tif'
 
-myData.Roi = [];
-myData.CellYX = [];
-% myData.GeneNames = [];
-
-myData = getRoi(o, myData);
-myData = getCellYX(o, myData);
+myData.Roi = getRoi(o);
+myData.CellYX = getCellYX(o, myData);
 
 % get the name of the folder where viewer lives in
 viewerRoot = fileparts(which(mfilename));
@@ -95,32 +91,35 @@ system ('java -jar ./jar/nanoSimpleWWW.jar > log.txt')
 end
 
 
-function out = getRoi(o, myData)
+function out = getRoi(o)
 
 y0 = min(o.CellCallRegionYX(:,1));
 x0 = min(o.CellCallRegionYX(:,2));
 y1 = max(o.CellCallRegionYX(:,1));
 x1 = max(o.CellCallRegionYX(:,2));
 
-myData.Roi = [x0, x1, y0, y1];
+% myData.Roi = [x0, x1, y0, y1];
 fprintf('%s: The Roi is BottomLeft: [%d, %d] and topRight: [%d, %d] \n', datestr(now), x0, y0, x1, y1);
-out = myData;
+out = [x0, x1, y0, y1];
 
 end
 
 
 function out = getCellYX(o, myData)
 
-fprintf('%s: loading CellMap from %s ', datestr(now), o.CellMapFile);
+fprintf('%s: loading CellMap from %s ...', datestr(now), o.CellMapFile);
 load(o.CellMapFile)
-fprintf('%s: Done! \n', datestr(now));
+fprintf('Done! \n');
+
+sanityCheck2(CellMap, myData.Roi)
+
 
 x0 = myData.Roi(1);
 y0 = myData.Roi(3);
 rp = regionprops(CellMap);
-myData.CellYX = fliplr(vertcat(rp.Centroid)) + [y0 x0]; % convert XY to YX
+CellYX = fliplr(vertcat(rp.Centroid)) + [y0 x0]; % convert XY to YX
 
-out = myData;
+out = CellYX;
 end
 
 
@@ -171,6 +170,22 @@ wRoi = dimRoi(1);
 
 if (hRoi ~= hImg) || (wRoi ~= wImg)
     error('The ROI implies an image of dimension %d by %d whereas the image is %d by %d pixels', wRoi, hRoi, wImg, hImg)
+end
+
+end
+
+
+function sanityCheck2(CellMap, roi)
+
+[h, w] = size(CellMap);
+
+% get the image dimensions as infered by the roi
+dimRoi = diff(roi) + 1;
+hRoi = dimRoi(3);
+wRoi = dimRoi(1);
+
+if (hRoi ~= h) || (wRoi ~= w)
+    error('The ROI implies an image of dimension %d by %d whereas the CellMap is %d by %d pixels', wRoi, hRoi, w, h)
 end
 
 end
