@@ -206,7 +206,7 @@ for i=1:o.CellCallMaxIter
         cellCallData.Neighbors = Neighbors;
         cellCallData.pSpotNeighb = pSpotNeighb;
         
-        stageViewer(o, cellCallData)
+        startViewer(o, cellCallData)
         
         figure(3985471)
         
