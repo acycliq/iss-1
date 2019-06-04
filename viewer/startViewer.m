@@ -191,15 +191,3 @@ end
 end
 
 
-
-% 
-% if any((strcmp(fieldnames(myData), 'ClassNames')))
-%     % rename the subclasses PC.CA2 and PC.CA3 to PC.Other1 and PC.Other2 
-%     isPC.CA2 = strcmp(myData.ClassNames, 'PC.CA2');
-%     myData.ClassNames{isPC.CA2} = 'PC.Other1';
-% 
-%     isPC.CA3 = strcmp(myData.ClassNames, 'PC.CA3');
-%     myData.ClassNames{isPC.CA3} = 'PC.Other2';
-% end
-
-
