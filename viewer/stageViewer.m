@@ -1,20 +1,19 @@
-function out = stageViewer(o, myData, cellCallData)
+function out = stageViewer(varargin)
 img = '.\img\background_boundaries.tif'
+o = varargin{1};
 % img = '\\basket.cortexlab.net\data\kenneth\iss\170315_161220KI_4-3\Output\background_image.tif'
+
+myData.Roi = [];
+myData.CellYX = [];
+% myData.GeneNames = [];
+
+myData = getRoi(o, myData);
+myData = getCellYX(o, myData);
 
 % get the name of the folder where viewer lives in
 viewerRoot = fileparts(which(mfilename));
 
-if any((strcmp(fieldnames(myData), 'ClassNames')))
-    % rename the subclasses PC.CA2 and PC.CA3 to PC.Other1 and PC.Other2 
-    isPC.CA2 = strcmp(myData.ClassNames, 'PC.CA2');
-    myData.ClassNames{isPC.CA2} = 'PC.Other1';
-
-    isPC.CA3 = strcmp(myData.ClassNames, 'PC.CA3');
-    myData.ClassNames{isPC.CA3} = 'PC.Other2';
-end
-
-clndt = cleanData(o, myData);
+clndt = cleanData(o, myData.Roi);
 uGenes = clndt.uGenes;
 PlotSpots = clndt.PlotSpots;
 GeneNo = clndt.GeneNo;
@@ -22,9 +21,9 @@ GeneNo = clndt.GeneNo;
 myData.allSpots = collectSpots(o, uGenes, PlotSpots, GeneNo);
 
 
-if nargin == 3
-    collectData(o, myData, cellCallData);
-elseif nargin == 2
+if nargin == 2
+    collectData(o, myData, varargin{2});
+elseif nargin == 1
     collectData(o, myData);
 else 
     error('I shouldnt be here..')
@@ -96,9 +95,38 @@ system ('java -jar ./jar/nanoSimpleWWW.jar > log.txt')
 end
 
 
-function out = cleanData(o, myData)
+function out = getRoi(o, myData)
 
-Roi = myData.Roi;
+y0 = min(o.CellCallRegionYX(:,1));
+x0 = min(o.CellCallRegionYX(:,2));
+y1 = max(o.CellCallRegionYX(:,1));
+x1 = max(o.CellCallRegionYX(:,2));
+
+myData.Roi = [x0, x1, y0, y1];
+fprintf('%s: The Roi is BottomLeft: [%d, %d] and topRight: [%d, %d] \n', datestr(now), x0, y0, x1, y1);
+out = myData;
+
+end
+
+
+function out = getCellYX(o, myData)
+
+fprintf('%s: loading CellMap from %s ', datestr(now), o.CellMapFile);
+load(o.CellMapFile)
+fprintf('%s: Done! \n', datestr(now));
+
+x0 = myData.Roi(1);
+y0 = myData.Roi(3);
+rp = regionprops(CellMap);
+myData.CellYX = fliplr(vertcat(rp.Centroid)) + [y0 x0]; % convert XY to YX
+
+out = myData;
+end
+
+
+
+function out = cleanData(o, Roi)
+
 SpotGeneName = o.GeneNames(o.SpotCodeNo);
 uGenes = unique(SpotGeneName);
 
@@ -106,8 +134,8 @@ uGenes = unique(SpotGeneName);
 QualOK = o.quality_threshold;
 
 % now show only those in Roi
-if ~isempty(myData.Roi)
-    InRoi = all(o.SpotGlobalYX>=myData.Roi([3 1]) & o.SpotGlobalYX<=myData.Roi([4 2]),2);
+if ~isempty(Roi)
+    InRoi = all(o.SpotGlobalYX>=Roi([3 1]) & o.SpotGlobalYX<=Roi([4 2]),2);
 else
     InRoi = true;
 end
@@ -146,5 +174,17 @@ if (hRoi ~= hImg) || (wRoi ~= wImg)
 end
 
 end
+
+
+
+% 
+% if any((strcmp(fieldnames(myData), 'ClassNames')))
+%     % rename the subclasses PC.CA2 and PC.CA3 to PC.Other1 and PC.Other2 
+%     isPC.CA2 = strcmp(myData.ClassNames, 'PC.CA2');
+%     myData.ClassNames{isPC.CA2} = 'PC.Other1';
+% 
+%     isPC.CA3 = strcmp(myData.ClassNames, 'PC.CA3');
+%     myData.ClassNames{isPC.CA3} = 'PC.Other2';
+% end
 
 

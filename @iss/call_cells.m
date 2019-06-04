@@ -192,18 +192,21 @@ for i=1:o.CellCallMaxIter
     
     %% diagnostics
     if ~isempty(o.CellCallShowCenter) && (Converged || o.Graphics==2 || i==o.CellCallMaxIter)
-        myData.GeneNames = GeneNames;
+%         myData.GeneNames = GeneNames;
 %         myData.ClassNames = ClassNames; 
-        myData.CellYX = CellYX;
-        myData.IncludeSpot = IncludeSpot;
-        myData.Roi = [x0 x1 y0 y1];
+%         myData.CellYX = CellYX;
+%         myData.IncludeSpot = IncludeSpot;
+%         myData.Roi = [x0 x1 y0 y1];
         
+        cellCallData.GeneNames = GeneNames;
+        cellCallData.ClassNames = ClassNames; 
+        cellCallData.IncludeSpot = IncludeSpot;
         cellCallData.pCellClass = pCellClass;
         cellCallData.CellGeneCount = CellGeneCount;
         cellCallData.Neighbors = Neighbors;
         cellCallData.pSpotNeighb = pSpotNeighb;
         
-        stageViewer(o, myData)
+        stageViewer(o, cellCallData)
         
         figure(3985471)
         

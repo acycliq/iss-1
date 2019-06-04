@@ -1,8 +1,12 @@
-function collectData(o, myData, cellCallData)
+function collectData(varargin)
+
+o = varargin{1}; 
+myData = varargin{2};
 
 if nargin == 2
     helper_1ite(myData)
 elseif nargin == 3
+    cellCallData = varargin{3};
     helper(o, myData, cellCallData)
 else
     disp('Hello')
@@ -41,14 +45,24 @@ end
 function helper(o, myData, cellCallData)
 
 allSpots = myData.allSpots;
-GeneNames = myData.GeneNames;
-ClassNames = myData.ClassNames; 
+GeneNames = cellCallData.GeneNames;
+ClassNames = cellCallData.ClassNames; 
 pCellClass = cellCallData.pCellClass; 
 CellGeneCount = cellCallData.CellGeneCount;
 CellYX = myData.CellYX;
-IncludeSpot = myData.IncludeSpot;
+IncludeSpot = cellCallData.IncludeSpot;
 Neighbors = cellCallData.Neighbors;
 pSpotNeighb = cellCallData.pSpotNeighb;
+
+
+% rename PC.CA2 to PC.Other1
+isPC.CA2 = strcmp(ClassNames, 'PC.CA2');
+ClassNames{isPC.CA2} = 'PC.Other1';
+
+% rename PC.CA3 to PC.Other2
+isPC.CA3 = strcmp(ClassNames, 'PC.CA3');
+ClassNames{isPC.CA3} = 'PC.Other2';
+
 
 % 1. Collect the cells and their locations
 collectCells(GeneNames, ClassNames, pCellClass, CellGeneCount, CellYX)
