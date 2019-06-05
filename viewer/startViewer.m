@@ -22,7 +22,10 @@ collectData(o, myData, cellCallData);
 
 xRange = 1+myData.Roi(2)-myData.Roi(1);
 yRange = 1+myData.Roi(4)-myData.Roi(3);
-scaleFactor = 32768/max(xRange, yRange);
+scaleFactor = 32768/xRange;
+if xRange <= yRange
+    scaleFactor = scaleFactor * xRange/yRange;
+end 
 
 % get the full path the the Vips executables
 [vipsExe, vipsheaderExe] = vips(viewerRoot);
