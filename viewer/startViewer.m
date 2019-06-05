@@ -1,9 +1,5 @@
 function out = startViewer(o, img, cellCallData)
 
-% img = '\\basket.cortexlab.net\data\kenneth\iss\170315_161220KI_4-3\Output\background_image.tif'
-
-
-
 if ~exist('cellCallData','var')
     % parameter does not exist, so default it to something
     cellCallData = NaN;
@@ -20,12 +16,8 @@ myData.allSpots = collectSpots(o, uGenes, PlotSpots, GeneNo);
 
 collectData(o, myData, cellCallData);
 
-xRange = 1+myData.Roi(2)-myData.Roi(1);
-yRange = 1+myData.Roi(4)-myData.Roi(3);
-scaleFactor = 32768/xRange;
-if xRange <= yRange
-    scaleFactor = scaleFactor * xRange/yRange;
-end 
+% calc how much you have to scale-up the image
+scaleFactor = getScaleFactor(myData.Roi);
 
 % get the full path the the Vips executables
 [vipsExe, vipsheaderExe] = vips(viewerRoot);
@@ -68,6 +60,18 @@ fprintf('%s: Press ENTER to stop serving the dir and return to the Matlab prompt
 % system ('start chrome http://localhost:8080');
 system ('start chrome http://localhost:8080 & java -jar ./jar/nanoSimpleWWW.jar > log.txt ');
 
+
+end
+
+
+function scaleFactor = getScaleFactor(Roi)
+
+xRange = 1+Roi(2)-Roi(1);
+yRange = 1+Roi(4)-Roi(3);
+scaleFactor = 32768/xRange;
+if xRange <= yRange
+    scaleFactor = scaleFactor * xRange/yRange;
+end 
 
 end
 
