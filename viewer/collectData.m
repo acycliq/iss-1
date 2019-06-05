@@ -1,19 +1,13 @@
-function collectData(varargin)
+function collectData(o, myData, cellCallData)
 
-o = varargin{1}; 
-myData = varargin{2};
 
-if nargin == 2
+if ~isstruct(cellCallData)
     helper_1ite(myData)
-elseif nargin == 3
-    cellCallData = varargin{3};
-    helper(o, myData, cellCallData)
 else
-    disp('Hello')
+    helper(o, myData, cellCallData)
 end
 
 end
-
 
 function helper_1ite(myData)
 

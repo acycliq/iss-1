@@ -1,10 +1,16 @@
-function out = startViewer(varargin)
-img = '.\img\background_boundaries.tif'
-o = varargin{1};
+function out = startViewer(o, img, cellCallData)
+
 % img = '\\basket.cortexlab.net\data\kenneth\iss\170315_161220KI_4-3\Output\background_image.tif'
 
+
+
+if ~exist('cellCallData','var')
+    % parameter does not exist, so default it to something
+    cellCallData = NaN;
+end
+
 myData.Roi = getRoi(o);
-myData.CellYX = getCellYX(o, myData);
+[myData.CellYX, status1] = getCellYX(o, myData);
 
 % get the name of the folder where viewer lives in
 viewerRoot = fileparts(which(mfilename));
@@ -12,63 +18,134 @@ viewerRoot = fileparts(which(mfilename));
 [uGenes, PlotSpots, GeneNo] = cleanData(o, myData.Roi);
 myData.allSpots = collectSpots(o, uGenes, PlotSpots, GeneNo);
 
-if nargin == 2
-    collectData(o, myData, varargin{2});
-elseif nargin == 1
-    collectData(o, myData);
-else 
-    error('I shouldnt be here..')
-end
+collectData(o, myData, cellCallData);
 
-Roi = myData.Roi;
-xRange = 1+Roi(2)-Roi(1);
-yRange = 1+Roi(4)-Roi(3);
+xRange = 1+myData.Roi(2)-myData.Roi(1);
+yRange = 1+myData.Roi(4)-myData.Roi(3);
 scaleFactor = 32768/max(xRange, yRange);
+
+% get the full path the the Vips executables
+[vipsExe, vipsheaderExe] = vips(viewerRoot);
 
 % first scale up the image
 dim = 32768;
 bigImg = [num2str(dim), 'px.tif'];
 
 % do a santity check before start upscaling the image 
-sanityCheck(img, Roi)
-
-% get the full path the the Vips executables
-[vipsExe, vipsheaderExe] = vips(viewerRoot);
+status2 = sanityCheck(img, myData.Roi);
 
 
-fprintf('%s: Upscaling the image \n', datestr(now));
-cmdStr = [vipsExe,  ' resize ' img ' ' bigImg ' ' num2str(scaleFactor, 9), ' --kernel nearest' ];
-system(cmdStr);
-fprintf('%s: Done! \n', datestr(now));
+if all([status1, status2])
+    % Upscale the image
+    try
+        flag1 = rescale(vipsExe, bigImg, img, scaleFactor);
+    catch ME
+        rethrow(ME)
+    end
 
-
-
-%now make the tiles
-fprintf('%s: Started doing the pyramid of tiles \n', datestr(now));
-tilesFolder = fullfile(fileparts(cd), 'viewer', 'dashboard', 'data', 'img', [num2str(dim),'px']);
-if ~exist(tilesFolder, 'dir')
-    fprintf('%s: Folder doesnt exist... \n', datestr(now));
-    mkdir(tilesFolder);
-    fprintf('%s: Created folder %s \n', datestr(now), tilesFolder);
+    % now make the tiles
+    try
+        flag2 = tileMaker(vipsExe, bigImg, dim);
+    catch ME
+        warning('Failed during tile making...Black background image will be shown');
+        getReport(ME)
+        myHandler(dim);
+    end
+else
+    myHandler(dim);
 end
-% enclose the name is double quotes to avoid problems with spaces in the path
-tilesFolder = ['"', tilesFolder, '"'];
-cmdStr = [vipsExe, ' gravity ' bigImg ' ' [tilesFolder, '.dz'] '[layout=google,suffix=.png,skip_blanks=0] south-west ' num2str(dim) ' ' num2str(dim) ' --extend black'];
-system(cmdStr);
-fprintf('%s: Done! \n', datestr(now));
 
 
 % save the image dimensions and the ROI to json files
-write2file(vipsheaderExe, bigImg, Roi, viewerRoot)
+write2file(vipsheaderExe, bigImg, myData.Roi, viewerRoot)
 
 
 % launch now the viewer
-system ('start chrome http://localhost:8080')
-system ('java -jar ./jar/nanoSimpleWWW.jar > log.txt')
+fprintf('%s: Press ENTER to stop serving the dir and return to the Matlab prompt. \n', datestr(now));
+% system ('start chrome http://localhost:8080');
+system ('start chrome http://localhost:8080 & java -jar ./jar/nanoSimpleWWW.jar > log.txt ');
 
 
 end
 
+
+function myHandler(dim)
+    % delete the contents from the folder 
+    tilesFolder = mkTilesFolder(dim);
+    
+    % enclose the name is double quotes to avoid problems with spaces in the path
+    tilesFolder = ['"', tilesFolder, '"'];
+    clearDir(tilesFolder)
+end
+
+
+function out = rescale(vipsExe, bigImg, img, scaleFactor)
+
+fprintf('%s: Upscaling the image \n', datestr(now));
+cmdStr = [vipsExe,  ' resize ' img ' ' bigImg ' ' num2str(scaleFactor, 9), ' --kernel nearest' ];
+status = system(cmdStr);
+
+if status == 0
+    fprintf('%s: Done! \n', datestr(now));
+else
+    error('%s: Failed! \n', datestr(now));
+end
+
+out = status;
+end
+
+
+function out = tileMaker(vipsExe, bigImg, dim)
+
+% first check if file exists
+status = exist(bigImg, 'file') == 2;
+
+if status
+    fprintf('%s: Started doing the pyramid of tiles \n', datestr(now));
+    tilesFolder = mkTilesFolder(dim);
+    
+    % enclose the name is double quotes to avoid problems with spaces in the path
+    tilesFolder = ['"', tilesFolder, '"'];
+    clearDir(tilesFolder)
+
+    cmdStr = [vipsExe, ' gravity ' bigImg ' ' [tilesFolder, '.dz'] '[layout=google,suffix=.png,skip_blanks=0] south-west ' num2str(dim) ' ' num2str(dim) ' --extend black'];
+    status = system(cmdStr);
+
+    if status == 0
+        fprintf('%s: Done! \n', datestr(now));
+    else
+        error('%s: Failed! \n', datestr(now));
+    end
+    
+else
+     fprintf('%s: Image doesnt exist, showing a black backbground instead \n', datestr(now));
+end
+
+out = status;
+end
+
+
+function out = mkTilesFolder(dim)
+
+    tilesFolder = fullfile(fileparts(cd), 'viewer', 'dashboard', 'data', 'img', [num2str(dim),'px']);
+    if ~exist(tilesFolder, 'dir')
+        fprintf('%s: Folder doesnt exist... \n', datestr(now));
+        mkdir(tilesFolder);
+        fprintf('%s: Created folder %s \n', datestr(now), tilesFolder);
+    end
+   
+    out = tilesFolder;
+end
+
+
+function clearDir(tilesFolder)
+
+fprintf('%s: Deleting files \n', datestr(now));
+cmdStr = ['del /S /Q ', tilesFolder, ' > NUL ']; %C:\Path\to\directory\*
+[status, out] = system(cmdStr);
+fprintf('%s: Done \n', datestr(now));
+
+end
 
 function write2file(vipsheaderExe, bigImg, Roi, viewerRoot)
 
@@ -99,10 +176,6 @@ vipsExe = ['"', vipsExe '"'];
 vipsheaderExe = fullfile(viewerRoot, 'vips', 'bin', 'vipsheader.exe');
 vipsheaderExe = ['"', vipsheaderExe '"'];
 
-% vips.exe = vipsExe;
-% vips.headerExe = vipsheaderExe;
-% 
-% out = vips;
 end
 
 
@@ -120,21 +193,19 @@ out = [x0, x1, y0, y1];
 end
 
 
-function out = getCellYX(o, myData)
+function [CellYX, status] = getCellYX(o, myData)
 
 fprintf('%s: loading CellMap from %s ...', datestr(now), o.CellMapFile);
 load(o.CellMapFile)
 fprintf('Done! \n');
 
-sanityCheck2(CellMap, myData.Roi)
-
+status = sanityCheck2(CellMap, myData.Roi);
 
 x0 = myData.Roi(1);
 y0 = myData.Roi(3);
 rp = regionprops(CellMap);
 CellYX = fliplr(vertcat(rp.Centroid)) + [y0 x0]; % convert XY to YX
 
-out = CellYX;
 end
 
 
@@ -160,7 +231,7 @@ PlotSpots = find(InRoi & QualOK);
 end
 
 
-function sanityCheck(img, roi)
+function status = sanityCheck(img, roi)
 viewerRoot = fileparts(which(mfilename));
 vipsheaderExe = fullfile(viewerRoot, 'vips', 'bin', 'vipsheader.exe');
 vipsheaderExe = ['"', vipsheaderExe '"'];
@@ -179,11 +250,11 @@ dimRoi = diff(roi) + 1;
 hRoi = dimRoi(3);
 wRoi = dimRoi(1);
 
-checkHelper(wRoi, hRoi, wImg, hImg, 'image')
+status = checkHelper(wRoi, hRoi, wImg, hImg, 'image');
 end
 
 
-function sanityCheck2(CellMap, roi)
+function status = sanityCheck2(CellMap, roi)
 
 [h, w] = size(CellMap);
 
@@ -192,14 +263,18 @@ dimRoi = diff(roi) + 1;
 hRoi = dimRoi(3);
 wRoi = dimRoi(1);
 
-checkHelper(wRoi, hRoi, w, h, 'CellMap')
+status = checkHelper(wRoi, hRoi, w, h, 'CellMap');
 end
 
 
-function checkHelper(wRoi, hRoi, w, h, label)
+function status = checkHelper(wRoi, hRoi, w, h, label)
 
 if (hRoi ~= h) || (wRoi ~= w)
-    error('The ROI implies an image of dimension %d by %d whereas the %s is %d by %d pixels', wRoi, hRoi, label, w, h)
+
+    warning('The ROI implies an image of dimension %d by %d whereas the %s is %d by %d pixels', wRoi, hRoi, label, w, h)
+    status = false;
+else
+    status = true;
 end
 
 end
