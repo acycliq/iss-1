@@ -1,15 +1,15 @@
-function collectData(o, myData, cellCallData)
+function collectData(o, myData, cellCallData, viewerRoot)
 
 
 if ~isstruct(cellCallData)
-    helper_1ite(myData)
+    helper_1ite(myData, viewerRoot)
 else
-    helper(o, myData, cellCallData)
+    helper(o, myData, cellCallData, viewerRoot)
 end
 
 end
 
-function helper_1ite(myData)
+function helper_1ite(myData, viewerRoot)
 
 [m,~] = size(myData.CellYX);
 for i=1:m
@@ -28,15 +28,15 @@ end
 nAs = size(myData.allSpots, 1);
 arr = [myData.allSpots, num2cell(nan(nAs,1))];
 
-saveJson(df)
-saveCsv(arr)
+saveJson(df, viewerRoot)
+saveCsv(arr, viewerRoot)
 
 end
 
 
 
 
-function helper(o, myData, cellCallData)
+function helper(o, myData, cellCallData, viewerRoot)
 
 allSpots = myData.allSpots;
 GeneNames = cellCallData.GeneNames;
@@ -59,7 +59,7 @@ ClassNames{isPC.CA3} = 'PC.Other2';
 
 
 % 1. Collect the cells and their locations
-collectCells(GeneNames, ClassNames, pCellClass, CellGeneCount, CellYX)
+collectCells(GeneNames, ClassNames, pCellClass, CellGeneCount, CellYX, viewerRoot)
 
 % 2. Find the best neighbour
 [~, BestNeighb] = max(pSpotNeighb,[],2);
@@ -78,12 +78,12 @@ res(ia) = mySpots(ib, 3);
 arr = [allSpots, num2cell(res)];
 % out(out(:,end)==0) = -1;
 
-saveCsv(arr)
+saveCsv(arr, viewerRoot)
 
 end
 
 
-function collectCells(GeneNames, ClassNames, pCellClass, CellGeneCount, CellYX)
+function collectCells(GeneNames, ClassNames, pCellClass, CellGeneCount, CellYX, viewerRoot)
 % DN wrote this to get data for the viewer
 
 [m,~] = size(CellYX);
@@ -103,37 +103,37 @@ for i=1:m
 end
 
 
-saveJson(df)
+saveJson(df, viewerRoot)
 
 end
 
 
-function saveJson(df)
+function saveJson(df, viewerRoot)
 
 VariableNames = {'Cell_Num','Y','X','Genenames','CellGeneCount','ClassName','Prob'};
 T = cell2table(df, 'VariableNames',VariableNames);
 
 jsonStr = jsonencode(T);
-str = ['.\dashboard\data\json\iss.json']; 
+str = fullfile(viewerRoot, 'dashboard', 'data', 'json', 'iss.json');
 fid = fopen(str, 'w');
 if fid == -1, error('Cannot create JSON file'); end
 fwrite(fid, jsonStr, 'char');
 fclose(fid);
 
-fprintf('%s: %s saved \n', datestr(now), str);
+fprintf('%s: %s saved \n', datestr(now), erase(str, pwd));
 
 end
 
 
 % out(out(:,end)==0) = -1;
-function saveCsv(arr)
+function saveCsv(arr, viewerRoot)
 
 T = cell2table(arr);
 T.Properties.VariableNames = {'Gene','Expt','y','x','neighbour' };
-str = ['.\dashboard\data\json\Dapi_overlays.csv']; 
+str = fullfile(viewerRoot, 'dashboard', 'data', 'json', 'Dapi_overlays.csv');
 writetable(T, str);
 
-fprintf('%s: %s saved. \n', datestr(now), str);
+fprintf('%s: %s saved. \n', datestr(now), erase(str, pwd));
 
 
 end
