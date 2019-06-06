@@ -1,6 +1,8 @@
 function out = startViewer(o, img, cellCallData)
 
-if ~exist('cellCallData','var')
+dim = 32768;
+
+if ~exist('cellCallData', 'var')
     % parameter does not exist, so default it to something
     cellCallData = NaN;
     
@@ -23,55 +25,78 @@ myData.Roi = getRoi(o);
 viewerRoot = fileparts(which(mfilename));
 
 % clear the folder from any old flatfiles.
-clearDir(fullfile(viewerRoot, 'dashboard', 'data', 'json'))
+clearDir(['"', fullfile(viewerRoot, 'dashboard', 'data', 'json'),'"'])
 
 [uGenes, PlotSpots, GeneNo] = cleanData(o, myData.Roi);
 myData.allSpots = collectSpots(o, uGenes, PlotSpots, GeneNo);
 
 collectData(o, myData, cellCallData);
 
-% calc how much you have to scale-up the image
-scaleFactor = getScaleFactor(myData.Roi);
+if ~exist('img', 'var')
+    fprintf('%s: No image passed-in. Black backround will be shown \n', datestr(now));
+    
+    % clear the folder from old files.
+    myHandler(dim)
+    
+    % save the roi as a json file
+    roiStruct.x0 = myData.Roi(1);
+    roiStruct.x1 = myData.Roi(2);
+    roiStruct.y0 = myData.Roi(3);
+    roiStruct.y1 = myData.Roi(4);
+    saveJSONfile(roiStruct, fullfile(viewerRoot, 'dashboard', 'data', 'json', 'roi.json'));
+    
+    % save the image size as a json file
+    [scaleFactor, xRange, yRange] = getScaleFactor(myData.Roi);
+    imageStruct.width = xRange * scaleFactor;
+    imageStruct.height = yRange * scaleFactor;
+    saveJSONfile(imageStruct,  fullfile(viewerRoot, 'dashboard', 'data', 'json', 'imageSize.json'));
+    
+    
+else
+    
+    % calc how much you have to scale-up the image
+    [scaleFactor, ~, ~] = getScaleFactor(myData.Roi);
 
-% get the full path the the Vips executables
-[vipsExe, vipsheaderExe] = vips(viewerRoot);
+    % get the full path the the Vips executables
+    [vipsExe, vipsheaderExe] = vips(viewerRoot);
 
-% first scale up the image
-dim = 32768;
-bigImg = [num2str(dim), 'px.tif'];
-bigImg = fullfile(viewerRoot, bigImg);
+    % first scale up the image
+    bigImg = [num2str(dim), 'px.tif'];
+    bigImg = fullfile(viewerRoot, bigImg);
 
-% do a santity check before start upscaling the image 
-status2 = sanityCheck(img, myData.Roi);
+    % do a santity check before start upscaling the image 
+    status2 = sanityCheck(img, myData.Roi);
 
 
-if all([status1, status2])
-    % Upscale the image
-    try
-        flag1 = rescale(vipsExe, ['"', bigImg, '"'], img, scaleFactor);
-    catch ME
-        rethrow(ME)
-    end
+    if all([status1, status2])
+        % Upscale the image
+        try
+            flag1 = rescale(vipsExe, ['"', bigImg, '"'], img, scaleFactor);
+        catch ME
+            rethrow(ME)
+        end
 
-    % now make the tiles
-    try
-        flag2 = tileMaker(vipsExe, bigImg, dim);
-    catch ME
-        warning('Failed during tile making...Black background image will be shown');
-        getReport(ME)
+        % now make the tiles
+        try
+            flag2 = tileMaker(vipsExe, bigImg, dim);
+        catch ME
+            warning('Failed during tile making...Black background image will be shown');
+            getReport(ME)
+            myHandler(dim);
+        end
+    else
         myHandler(dim);
     end
-else
-    myHandler(dim);
-end
 
+    
+    % save the image dimensions and the ROI to json files
+    write2file(vipsheaderExe, ['"', bigImg, '"'], myData.Roi, viewerRoot)
+    
+    % ImgPath = fullfile(viewerRoot, bigImg);
+    if exist(bigImg, 'file') == 2
+      delete(bigImg);
+    end
 
-% save the image dimensions and the ROI to json files
-write2file(vipsheaderExe, ['"', bigImg, '"'], myData.Roi, viewerRoot)
-
-% ImgPath = fullfile(viewerRoot, bigImg);
-if exist(bigImg, 'file') == 2
-  delete(bigImg);
 end
 
 
@@ -86,7 +111,7 @@ out = 1;
 end
 
 
-function scaleFactor = getScaleFactor(Roi)
+function [scaleFactor, xRange, yRange] = getScaleFactor(Roi)
 
 xRange = 1+Roi(2)-Roi(1);
 yRange = 1+Roi(4)-Roi(3);
