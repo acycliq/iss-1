@@ -65,6 +65,11 @@ end
 % save the image dimensions and the ROI to json files
 write2file(vipsheaderExe, bigImg, myData.Roi, viewerRoot)
 
+ImgPath = [viewerRoot, '\', bigImg];
+if exist(ImgPath, 'file')==2
+  delete(ImgPath);
+end
+
 
 % launch now the viewer
 fprintf('%s: Press ENTER to stop serving the dir and return to the Matlab prompt. \n', datestr(now));
