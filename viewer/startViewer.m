@@ -24,13 +24,17 @@ myData.Roi = getRoi(o);
 % get the name of the folder where viewer lives in
 viewerRoot = fileparts(which(mfilename));
 
+if ~startsWith(viewerRoot, pwd)
+    error('%s: The viewer folder should in the same folder as or below the %s', datestr(now), pwd)
+end
+
 % clear the folder from any old flatfiles.
 clearDir(['"', fullfile(viewerRoot, 'dashboard', 'data', 'json'),'"'])
 
 [uGenes, PlotSpots, GeneNo] = cleanData(o, myData.Roi);
 myData.allSpots = collectSpots(o, uGenes, PlotSpots, GeneNo);
 
-collectData(o, myData, cellCallData);
+collectData(o, myData, cellCallData, viewerRoot);
 
 if ~exist('img', 'var')
     fprintf('%s: No image passed-in. Black backround will be shown \n', datestr(now));
@@ -78,7 +82,7 @@ else
 
         % now make the tiles
         try
-            flag2 = tileMaker(vipsExe, bigImg, dim);
+            flag2 = tileMaker(vipsExe, bigImg, dim, viewerRoot);
         catch ME
             warning('Failed during tile making...Black background image will be shown');
             getReport(ME)
@@ -100,11 +104,16 @@ else
 end
 
 
+
+subFolder = erase(viewerRoot, pwd);
+
 % launch now the viewer
 % fprintf('%s: Launching viewer. Copy-paste this link <a href="http://localhost:8080">http://localhost:8080</a> to the browser if it doesnt load automatically.\n', datestr(now))
 fprintf('%s: Press ENTER to stop serving the dir and return to the Matlab prompt. \n', datestr(now));
 % system ('start chrome http://localhost:8080');
-system ('start chrome http://localhost:8080 & java -jar ./jar/nanohttpd-webserver-2.1.1-jar-with-dependencies.jar > log.txt ');
+
+nanoHttpd = fullfile(viewerRoot, 'jar', 'nanohttpd-webserver-2.1.1-jar-with-dependencies.jar');
+system (['start chrome http://localhost:8080', subFolder, ' & java -jar ', ['"', nanoHttpd, '"'], ' > log.txt ']);
 
 out = 1;
 
@@ -149,14 +158,14 @@ out = status;
 end
 
 
-function out = tileMaker(vipsExe, bigImg, dim)
+function out = tileMaker(vipsExe, bigImg, dim, viewerRoot)
 
 % first check if file exists
 status = exist(bigImg, 'file') == 2;
 
 if status
     fprintf('%s: Started doing the pyramid of tiles. It will take around 2mins and 1.5GB of diskspace. \n', datestr(now));
-    tilesFolder = mkTilesFolder(dim);
+    tilesFolder = mkTilesFolder(dim, viewerRoot);
     
     % enclose the name is double quotes to avoid problems with spaces in the path
     tilesFolder = ['"', tilesFolder, '"'];
@@ -180,9 +189,9 @@ out = status;
 end
 
 
-function out = mkTilesFolder(dim)
+function out = mkTilesFolder(dim, viewerRoot)
 
-    tilesFolder = fullfile(fileparts(cd), 'viewer', 'dashboard', 'data', 'img', [num2str(dim),'px']);
+    tilesFolder = fullfile(viewerRoot, 'dashboard', 'data', 'img', [num2str(dim),'px']);
     if ~exist(tilesFolder, 'dir')
         fprintf('%s: Folder doesnt exist... \n', datestr(now));
         mkdir(tilesFolder);
@@ -291,6 +300,11 @@ end
 
 
 function status = sanityCheck(img, roi)
+
+if ~isfile(img) % Note: looks better than the old way of "if exist(filename, 'file') == 2"
+     error('%s: %s does not exist.', datestr(now), img)
+end
+    
 viewerRoot = fileparts(which(mfilename));
 vipsheaderExe = fullfile(viewerRoot, 'vips', 'bin', 'vipsheader.exe');
 vipsheaderExe = ['"', vipsheaderExe '"'];
