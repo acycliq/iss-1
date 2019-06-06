@@ -130,7 +130,7 @@ function out = tileMaker(vipsExe, bigImg, dim)
 status = exist(bigImg, 'file') == 2;
 
 if status
-    fprintf('%s: Started doing the pyramid of tiles \n', datestr(now));
+    fprintf('%s: Started doing the pyramid of tiles. It will take around 2mins and 1.5GB of diskspace. \n', datestr(now));
     tilesFolder = mkTilesFolder(dim);
     
     % enclose the name is double quotes to avoid problems with spaces in the path
