@@ -22,6 +22,9 @@ myData.Roi = getRoi(o);
 % get the name of the folder where viewer lives in
 viewerRoot = fileparts(which(mfilename));
 
+% clear the folder from any old flatfiles.
+clearDir(fullfile(viewerRoot, 'dashboard', 'data', 'json'))
+
 [uGenes, PlotSpots, GeneNo] = cleanData(o, myData.Roi);
 myData.allSpots = collectSpots(o, uGenes, PlotSpots, GeneNo);
 
@@ -36,6 +39,7 @@ scaleFactor = getScaleFactor(myData.Roi);
 % first scale up the image
 dim = 32768;
 bigImg = [num2str(dim), 'px.tif'];
+bigImg = fullfile(viewerRoot, bigImg);
 
 % do a santity check before start upscaling the image 
 status2 = sanityCheck(img, myData.Roi);
@@ -44,7 +48,7 @@ status2 = sanityCheck(img, myData.Roi);
 if all([status1, status2])
     % Upscale the image
     try
-        flag1 = rescale(vipsExe, bigImg, img, scaleFactor);
+        flag1 = rescale(vipsExe, ['"', bigImg, '"'], img, scaleFactor);
     catch ME
         rethrow(ME)
     end
@@ -63,19 +67,21 @@ end
 
 
 % save the image dimensions and the ROI to json files
-write2file(vipsheaderExe, bigImg, myData.Roi, viewerRoot)
+write2file(vipsheaderExe, ['"', bigImg, '"'], myData.Roi, viewerRoot)
 
-ImgPath = [viewerRoot, '\', bigImg];
-if exist(ImgPath, 'file')==2
-  delete(ImgPath);
+% ImgPath = fullfile(viewerRoot, bigImg);
+if exist(bigImg, 'file') == 2
+  delete(bigImg);
 end
 
 
 % launch now the viewer
+% fprintf('%s: Launching viewer. Copy-paste this link <a href="http://localhost:8080">http://localhost:8080</a> to the browser if it doesnt load automatically.\n', datestr(now))
 fprintf('%s: Press ENTER to stop serving the dir and return to the Matlab prompt. \n', datestr(now));
 % system ('start chrome http://localhost:8080');
-system ('start chrome http://localhost:8080 & java -jar ./jar/nanoSimpleWWW.jar > log.txt ');
+system ('start chrome http://localhost:8080 & java -jar ./jar/nanohttpd-webserver-2.1.1-jar-with-dependencies.jar > log.txt ');
 
+out = 1;
 
 end
 
@@ -129,6 +135,7 @@ if status
     
     % enclose the name is double quotes to avoid problems with spaces in the path
     tilesFolder = ['"', tilesFolder, '"'];
+    bigImg = ['"', bigImg, '"'];
     clearDir(tilesFolder)
 
     cmdStr = [vipsExe, ' gravity ' bigImg ' ' [tilesFolder, '.dz'] '[layout=google,suffix=.png,skip_blanks=0] south-west ' num2str(dim) ' ' num2str(dim) ' --extend black'];
@@ -163,31 +170,35 @@ end
 
 function clearDir(tilesFolder)
 
-fprintf('%s: Deleting files \n', datestr(now));
-cmdStr = ['del /S /Q ', tilesFolder, ' > NUL ']; %C:\Path\to\directory\*
+% fprintf('%s: Deleting files \n', datestr(now));
+cmdStr = ['del /S /Q ', tilesFolder, ' > NUL ']; 
 [status, out] = system(cmdStr);
-fprintf('%s: Done \n', datestr(now));
+% fprintf('%s: Done \n', datestr(now));
 
 end
+
 
 function write2file(vipsheaderExe, bigImg, Roi, viewerRoot)
 
 % read the dimensions of the scaled image
 cmdStr = [vipsheaderExe, ' -f height ', bigImg];
 [status, h] = system(cmdStr);
+if status ~=0; error('Failed. \n%s', h); end
+
 cmdStr = [vipsheaderExe, ' -f width ', bigImg];
 [status, w] = system(cmdStr);
+if status ~=0; error('Failed. \n%s', h); end
+
 imageStruct.height = str2double(h);
 imageStruct.width =  str2double(w);
-saveJSONfile(imageStruct, [viewerRoot, '\dashboard\data\json\imageSize.json'])
-
+saveJSONfile(imageStruct,  fullfile(viewerRoot, 'dashboard', 'data', 'json', 'imageSize.json'));
 
 % save the roi as a json file
 roiStruct.x0 = Roi(1);
 roiStruct.x1 = Roi(2);
 roiStruct.y0 = Roi(3);
 roiStruct.y1 = Roi(4);
-saveJSONfile(roiStruct, [viewerRoot, '\dashboard\data\json\roi.json'])
+saveJSONfile(roiStruct, fullfile(viewerRoot, 'dashboard', 'data', 'json', 'roi.json'));
 
 end
 
