@@ -3,8 +3,19 @@ function out = startViewer(o, img, cellCallData)
 if ~exist('cellCallData','var')
     % parameter does not exist, so default it to something
     cellCallData = NaN;
+    
 end
 
+if isstruct(cellCallData)
+    fn = fieldnames(cellCallData);
+    target = {'GeneNames', 'ClassNames', 'IncludeSpot', 'pCellClass', 'CellGeneCount', 'Neighbors', 'pSpotNeighb'};
+    if ~isempty(setdiff(fn, target))
+        msg = sprintf('%s: cellCallData should be a structure with fields: \n', datestr(now));
+        msg = sprintf('%s \n %s \n ', msg, target{:});
+        error(msg);
+    end
+end
+    
 myData.Roi = getRoi(o);
 [myData.CellYX, status1] = getCellYX(o, myData);
 
