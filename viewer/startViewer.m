@@ -1,4 +1,4 @@
-function out = startViewer(o, img, cellCallData)
+function startViewer(o, img, cellCallData)
 
 dim = 32768;
 
@@ -115,7 +115,6 @@ fprintf('%s: Press ENTER to stop serving the dir and return to the Matlab prompt
 nanoHttpd = fullfile(viewerRoot, 'jar', 'nanohttpd-webserver-2.1.1-jar-with-dependencies.jar');
 system (['start chrome http://localhost:8080', subFolder, ' & java -jar ', ['"', nanoHttpd, '"'], ' > log.txt ']);
 
-out = 1;
 
 end
 
@@ -348,6 +347,7 @@ if (hRoi ~= h) || (wRoi ~= w)
     status = false;
 else
     status = true;
+    fprintf('%s: Check....OK! \n', datestr(now))
 end
 
 end
