@@ -76,6 +76,9 @@ else
         % Upscale the image
         try
             flag1 = rescale(vipsExe, ['"', bigImg, '"'], img, scaleFactor);
+            
+            % check the output
+            sanityCheck3(['"', bigImg, '"'], vipsheaderExe, dim)
         catch ME
             rethrow(ME)
         end
@@ -336,6 +339,25 @@ hRoi = dimRoi(3);
 wRoi = dimRoi(1);
 
 status = checkHelper(wRoi, hRoi, w, h, 'CellMap');
+end
+
+function sanityCheck3(bigImg, vipsheaderExe, dim)
+
+% get the image dimensions from the tif
+cmdStr = [vipsheaderExe, ' -f height ', bigImg];
+[~, h] = system(cmdStr);
+h = str2double(h);
+
+cmdStr = [vipsheaderExe, ' -f width ', bigImg];
+[~, w] = system(cmdStr);
+w = str2double(w);
+
+if max(h, w) ~= dim
+    error('%s: The longest side of %s  should be %d pixels but it is %d \n', datestr(now), bigImg, dim, max(h, w))
+else
+    fprintf('%s: Check passed! \n', datestr(now))
+end
+
 end
 
 
