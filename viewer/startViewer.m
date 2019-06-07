@@ -150,14 +150,14 @@ end
 
 function out = rescale(vipsExe, bigImg, img, scaleFactor)
 
-fprintf('%s: Upscaling the image \n', datestr(now));
+fprintf('%s: Upscaling the image ', datestr(now));
 cmdStr = [vipsExe,  ' resize ' img ' ' bigImg ' ' num2str(scaleFactor, 9), ' --kernel nearest' ];
 status = system(cmdStr);
 
 if status == 0
-    fprintf('%s: Done! \n', datestr(now));
+    fprintf('...Done! \n');
 else
-    error('%s: Failed! \n', datestr(now));
+    error('...Failed! \n');
 end
 
 out = status;
@@ -170,7 +170,7 @@ function out = tileMaker(vipsExe, bigImg, dim, viewerRoot)
 status = exist(bigImg, 'file') == 2;
 
 if status
-    fprintf('%s: Started doing the pyramid of tiles. It will take around 2mins and 1.5GB of diskspace. \n', datestr(now));
+    fprintf('%s: Started doing the pyramid of tiles. It will take around 2mins and (temporarily) 1.5GB of diskspace. \n', datestr(now));
     tilesFolder = mkTilesFolder(dim, viewerRoot);
     
     % enclose the name is double quotes to avoid problems with spaces in the path
@@ -359,7 +359,7 @@ w = str2double(w);
 if max(h, w) ~= dim
     error('%s: The longest side of %s  should be %d pixels but it is %d \n', datestr(now), bigImg, dim, max(h, w))
 else
-    fprintf('%s: Check passed! \n', datestr(now))
+    fprintf('%s: Check....OK! \n', datestr(now))
 end
 
 end
