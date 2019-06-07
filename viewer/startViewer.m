@@ -99,7 +99,7 @@ else
     % save the image dimensions and the ROI to json files
     write2file(vipsheaderExe, ['"', bigImg, '"'], myData.Roi, viewerRoot)
     
-    % ImgPath = fullfile(viewerRoot, bigImg);
+    % The upscaled image is not needed anymore. Remove it.
     if exist(bigImg, 'file') == 2
       delete(bigImg);
     end
@@ -114,9 +114,13 @@ subFolder = erase(viewerRoot, pwd);
 % fprintf('%s: Launching viewer. Copy-paste this link <a href="http://localhost:8080">http://localhost:8080</a> to the browser if it doesnt load automatically.\n', datestr(now))
 fprintf('%s: Press ENTER to stop serving the dir and return to the Matlab prompt. \n', datestr(now));
 % system ('start chrome http://localhost:8080');
-
+if isstruct(cellCallData)
+    pageId = '';
+else
+    pageId = '2';
+end
 nanoHttpd = fullfile(viewerRoot, 'jar', 'nanohttpd-webserver-2.1.1-jar-with-dependencies.jar');
-system (['start chrome http://localhost:8080', subFolder, ' & java -jar ', ['"', nanoHttpd, '"'], ' > log.txt ']);
+system (['start chrome http://localhost:8080', subFolder, '/index', pageId, '.html & java -jar ', ['"', nanoHttpd, '"'], ' > log.txt ']);
 
 
 end
@@ -279,7 +283,6 @@ CellYX = fliplr(vertcat(rp.Centroid)) + [y0 x0]; % convert XY to YX
 end
 
 
-
 function [uGenes, PlotSpots, GeneNo] = cleanData(o, Roi)
 
 SpotGeneName = o.GeneNames(o.SpotCodeNo);
@@ -340,6 +343,7 @@ wRoi = dimRoi(1);
 
 status = checkHelper(wRoi, hRoi, w, h, 'CellMap');
 end
+
 
 function sanityCheck3(bigImg, vipsheaderExe, dim)
 
