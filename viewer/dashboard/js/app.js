@@ -148,5 +148,7 @@ function getLandingCoords(str){
 }
 
 function getMinZoom(str) {
-    return str === 'default' ? 4 : 2;
+    return geneData.length > 250000 ? 4 :
+        geneData.length > 100000 ? 3 :
+            2;
 }
