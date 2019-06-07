@@ -363,45 +363,6 @@
     <!--Another user script. Needs to be here, after all the divs have been read-->
     <script src='dashboard/js/index.js'></script>
 
-    <script>
-        $("#submitBtn").click(function () {
-            String.prototype.unquoted = function (){return this.replace (/(^")|("$)/g, '')};
-            var localhostPath = $('#localhostPath').val().unquoted();
-            var localhostPort = $('#portNumber').val().unquoted();
-            var spotsFile = $('#csvPath').val().unquoted();
-            var issFile = $('#jsonPath').val().unquoted();
-            var roiPoints = $('#roi').val();
-            var tilesRoot = $('#tilesPath').val();
-            var imageSizeStr = $('#imageSize').val();
-            //replace so it points to the localhost
-            spotsFile = spotsFile.replace(localhostPath.unquoted(), "http://localhost"+":"+ localhostPort);
-            issFile = issFile.replace(localhostPath.unquoted(), "http://localhost"+":"+ localhostPort);
-            tilesRoot = tilesRoot.replace(localhostPath.unquoted(), "http://localhost"+":"+ localhostPort);
-            console.log('Gene data will be fetched from ' + spotsFile);
-            console.log('Cell data will be fetched from ' + issFile);
-            var userInputs = {};
-            userInputs.x = 'User defined';
-            userInputs.localhostPath = localhostPath;
-            userInputs.localhostPort = localhostPort;
-            userInputs.issFile = issFile;
-            userInputs.spotsFile = spotsFile;
-            userInputs.roiPoints = roiPoints;
-            userInputs.tilesRoot = tilesRoot;
-            userInputs.imageSizeStr = imageSizeStr;
-            dispatcher(userInputs)
-        });
-        $("#resetBtn").click(function () {
-            console.log('resetting the input fields...')
-            $('#localhostPath').val('');
-            $('#portNumber').val('');
-            $('#csvPath').val('');
-            $('#jsonPath').val('');
-            $('#roi').val('');
-            $('#tilesPath').val('');
-            $('#imageSize').val('');
-        });
-    </script>
-
 
     <!--this will stop the preloader after 3sec. (can get rid off the time-out and make it show the webpage when all charts are rendered??)-->
     <script>
