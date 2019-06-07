@@ -261,7 +261,7 @@ y1 = max(o.CellCallRegionYX(:,1));
 x1 = max(o.CellCallRegionYX(:,2));
 
 % myData.Roi = [x0, x1, y0, y1];
-fprintf('%s: The Roi is BottomLeft: [%d, %d] and topRight: [%d, %d] \n', datestr(now), x0, y0, x1, y1);
+fprintf('%s: The Roi is bottomLeft: [%d, %d] and topRight: [%d, %d] \n', datestr(now), x0, y0, x1, y1);
 out = [x0, x1, y0, y1];
 
 end
