@@ -50,7 +50,7 @@ if ~exist('img', 'var')
     saveJSONfile(roiStruct, fullfile(viewerRoot, 'dashboard', 'data', 'json', 'roi.json'));
     
     % save the image size as a json file
-    [scaleFactor, xRange, yRange] = getScaleFactor(myData.Roi);
+    [scaleFactor, xRange, yRange] = getScaleFactor(myData.Roi, dim);
     imageStruct.width = xRange * scaleFactor;
     imageStruct.height = yRange * scaleFactor;
     saveJSONfile(imageStruct,  fullfile(viewerRoot, 'dashboard', 'data', 'json', 'imageSize.json'));
@@ -59,7 +59,7 @@ if ~exist('img', 'var')
 else
     
     % calc how much you have to scale-up the image
-    [scaleFactor, ~, ~] = getScaleFactor(myData.Roi);
+    [scaleFactor, ~, ~] = getScaleFactor(myData.Roi, dim);
 
     % get the full path the the Vips executables
     [vipsExe, vipsheaderExe] = vips(viewerRoot);
@@ -126,11 +126,11 @@ system (['start chrome http://localhost:8080', subFolder, '/index', pageId, '.ht
 end
 
 
-function [scaleFactor, xRange, yRange] = getScaleFactor(Roi)
+function [scaleFactor, xRange, yRange] = getScaleFactor(Roi, dim)
 
 xRange = 1+Roi(2)-Roi(1);
 yRange = 1+Roi(4)-Roi(3);
-scaleFactor = 32768/xRange;
+scaleFactor = dim/xRange;
 if xRange <= yRange
     scaleFactor = scaleFactor * xRange/yRange;
 end 
