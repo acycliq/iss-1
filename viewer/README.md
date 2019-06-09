@@ -17,7 +17,7 @@ No extra dependencies are needed (apart from Matlab). Everything is portable and
 * Get the folder `viewer` from the this repo:
 https://github.com/acycliq/iss-1/tree/viewer (ie everything you see your on your screen, above this **README** along with the subfolders)
 
-* Put it in the Matlab path and `cd` into it (or any of its parent folders).
+* Put it in the Matlab path and from the Matlab prompt `cd` into it (or any of its parent folders).
 
 * Launch the viewer by one of the following two ways:
     * Call `startViewer(o, img)`
