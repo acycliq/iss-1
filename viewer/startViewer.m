@@ -1,4 +1,26 @@
 function startViewer(o, img, cellCallData)
+% PURPOSE: The primary purpose is to provide a web interface, similar to a
+%          "slippy map", for visualising the findings of the cell calling 
+%          methodology described in Qian at al, doi: https://doi.org/10.1101/431957
+%          It can also be used independetly, as a more generic tool to plot 
+%          spots on a zoomable background image.
+% INPUT:   o: A matlab object of type iss (obtained by Kenneth's code)
+%          img: (Optional) The full path to the background image. If
+%           ommited, a plain black background will be shown.
+%          cellCallData: (Optional) A matlab structure with the following
+%           fields:
+%               GeneNames
+%               ClassNames
+%               IncludeSpot
+%               pCellClass
+%               CellGeneCount
+%               Neighbors
+%               pSpotNeighb
+%            which should be obtained from Kenneth's "call_cells" function and
+%            after the algorithm has converged. If ommited, no cell calling
+%            specific results will be shown. You only get a visualisation of 
+%            the spots plotted on the zoomable background image.
+
 
 dim = 32768;
 
