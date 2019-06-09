@@ -42,7 +42,7 @@ https://github.com/acycliq/iss-1/tree/viewer (ie everything you see your on your
 To do that you have to manually edit the file `call_cells.m`  and add the code snippet above so it can be called after the algorithm 
 has converged. This could be for example, the line right before the first Matlab figure opens up and before this if statement: 
 `if ~isempty(o.CellCallShowCenter) && (Converged || o.Graphics==2 || i==o.CellCallMaxIter)`. See image below which shows an edited snippet 
-of the `call_cells` function from ``@iss\call_cells.m' :
+of the `call_cells` function from `@iss\call_cells.m` :
  
  
  ![alt text](screen.png)
