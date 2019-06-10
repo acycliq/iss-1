@@ -2,7 +2,7 @@ function startViewer(o, img, cellCallData)
 % PURPOSE: The primary purpose is to provide a web interface, similar to a
 %          "slippy map", for visualising the findings of the cell calling 
 %          methodology described in Qian at al, doi: https://doi.org/10.1101/431957
-%          It can also be used independetly, as a more generic tool to plot 
+%          It can also be used independently, as a more generic tool to plot
 %          spots on a zoomable background image.
 % INPUT:   o: A matlab object of type iss (obtained by Kenneth's code)
 %          img: (Optional) The full path to the background image. If
