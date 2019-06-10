@@ -25,7 +25,7 @@ function startViewer(o, img, cellCallData)
 dim = 32768;
 
 if ~exist('cellCallData', 'var')
-    % parameter does not exist, so default it to something
+    % parameter does not exist, so default it to nan
     cellCallData = NaN;
     
 end
