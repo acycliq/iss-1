@@ -34,7 +34,7 @@ function section() {
     }
 
     // var colorScale = d3.scaleLinear().domain([0, 1]).range(['tomato', 'tomato']);
-    var colorRamp = classColorsCodes()
+    var colorRamp = classColorsCodes();
     var colorMap = d3.map(colorRamp, function (d) {
         return d.className;
     });
@@ -43,7 +43,7 @@ function section() {
     var container = d3.select('#scatter-plot');
 
     var zoom = d3.zoom()
-        .scaleExtent([1, 20])
+        .scaleExtent([1, 20]);
         //.on("zoom", zoomed);
 
     var tooltip = d3.select("body").append("div")
@@ -63,11 +63,11 @@ function section() {
     // grid lines group must be before the dotsGroup group so that the
     /// gridlines are rendered under the circles and not above!
     var xGrid = svg.append("g")
-        .attr("class", "grid")
+        .attr("class", "grid");
         // .call(sectionFeatures.gridlines.x);
 
     var yGrid = svg.append("g")
-        .attr("class", "grid")
+        .attr("class", "grid");
         // .call(sectionFeatures.gridlines.y);
 
     // Clip path
@@ -79,25 +79,25 @@ function section() {
 
     var dotsGroup = svg.append("g")
         .attr("clip-path", "url(#clip)")
-        .attr("transform", "translate(4, 0)") // no idea why!
+        //.attr("transform", "translate(0, 0)")
         .append("g")
         .attr('id', 'dotsGroup');
 
     //Create X axis
     var renderXAxis = svg.append("g")
-        .attr("class", "x axis")
+        .attr("class", "x axis");
 
     //Create Y axis
     var renderYAxis = svg.append("g")
-        .attr("class", "y axis")
+        .attr("class", "y axis");
 
     //Create X grilines
     var renderXGridline = svg.append("g")
-        .attr("class", "x gridline")
+        .attr("class", "x gridline");
 
     //Create Y gridlines
     var renderYGridline = svg.append("g")
-        .attr("class", "y gridline")
+        .attr("class", "y gridline");
 
     // set up axis generating functions
     var xTicks = Math.round(width / 50);
@@ -113,11 +113,11 @@ function section() {
     }
 
     // voronoi
-    var voronoi = d3.voronoi()
+    var voronoi = d3.voronoi();
 
     function renderOrder(y) {
         return y === 'Zero' ? 1 :
-            y === 'PC' ? 2 :
+            y === 'PC' ? 2:
                 y === 'Non Neuron' ? 3 :
                     y === 'PC Other2' ? 4 :
                         y === 'PC Other1' ? 5 :
@@ -172,6 +172,7 @@ function section() {
     chartData.xGrid = xGrid;
     chartData.yGrid = yGrid;
     chartData.voronoi = voronoi;
+    chartData.zoomLevel = 1.0; // Thats ok. It is going to be updated later on, when the zoom function comes alive
 
     return chartData
 }
@@ -197,9 +198,29 @@ function aggregator(data) {
     // sort in decreasing order
     out.sort(function (x, y) {
         return d3.ascending(y.Prob, x.Prob);
-    })
+    });
 
     return out
+}
+
+function setIdentifiedType(d){
+    if (d.IdentifiedType) {
+        it = d.IdentifiedType
+    } else {
+        it = 'Other'
+        console.log('IdentifiedType for ' + d.ClassName + ' was set to "Other" ')
+    }
+    return it
+}
+
+function setColor(d){
+    if (d.color) {
+        c = d.color
+    } else {
+        c = '#C0C0C0'
+        console.log('color  for ' + d.ClassName + ' was set to "#C0C0C0" ')
+    }
+    return c
 }
 
 function dataManager(sectionFeatures, data) {
@@ -207,10 +228,12 @@ function dataManager(sectionFeatures, data) {
     for (var i = 0; i < data.length; ++i) {
         var temp = [];
         for (var j = 0; j < data[i].ClassName.length; ++j) {
-            console.log(data[i].ClassName[j])
+            // console.log(data[i].ClassName[j])
             temp.push({
-                IdentifiedType: sectionFeatures.colorMap.get(data[i].ClassName[j]).IdentifiedType,
-                color: sectionFeatures.colorMap.get(data[i].ClassName[j]).color,
+                // IdentifiedType: sectionFeatures.colorMap.get(data[i].ClassName[j]).IdentifiedType,
+                IdentifiedType: setIdentifiedType(sectionFeatures.colorMap.get(data[i].ClassName[j])),
+                // color: sectionFeatures.colorMap.get(data[i].ClassName[j]).color,
+                color: setColor(sectionFeatures.colorMap.get(data[i].ClassName[j])),
                 Prob: data[i].Prob[j]? data[i].Prob[j]: [data[i].Prob] //Maybe that one is better
             })
         }
@@ -219,10 +242,12 @@ function dataManager(sectionFeatures, data) {
             x: data[i].x,
             y: data[i].y,
             GeneCountTotal: data[i].CellGeneCount.reduce((a, b) => a + b, 0), //get the sum of all the elements in the array
-            IdentifiedType: agg[0]? agg[0].IdentifiedType: null,
-            color: agg[0]? agg[0].color: null,
-            Prob: agg[0]? agg[0].Prob: null,
-            renderOrder: agg[0]? sectionFeatures.renderOrder(agg[0].IdentifiedType): null,
+            IdentifiedType: agg[0].IdentifiedType,
+            color: agg[0].color,
+            Prob: agg[0].Prob,
+            renderOrder: sectionFeatures.renderOrder(agg[0].IdentifiedType),
+            // renderOrder: null, // This will be set/updated later on
+            // renderOrder2: sectionFeatures.renderOrder2(countData, agg[0].IdentifiedType),
 
         })
     }
@@ -230,19 +255,51 @@ function dataManager(sectionFeatures, data) {
     return chartData
 }
 
+function updateManagedData(md, arr){
+    // Will stick a new property that controls the renderOrder of the circles shown in the section chart.
+    //
+    // Side note:   arr is an array of objects. Each object looks like a dict, its properties are key and value.
+    //              The key the class name and value the total counts of the cells with cell class the same as the key
+    //              Hence if you add up all the values the total should the same as the total number of cells. You can do this by typing
+    //              arr.map(item => item.value).reduce((prev, next) => prev + next);
+
+    // First, sort array arr in decreasing order
+    arr.sort(function (x, y) {
+        return d3.ascending(y.value, x.value);
+    });
+
+    // now loop over dm and for each element get its IdentifiedType and find its corresponding position in the sorted array arr
+    md.forEach(function(d){
+        var idx = arr.findIndex( el => el.key === d.IdentifiedType );
+
+        // set now the renderOrder property. Cells with larger idx will be rendered on top of those with smaller idx. Hence, if
+        // two cells overlap the cell with large idx (=smaller counts) will be distinguishable and not hidden)
+        d.renderOrder = idx>=0? idx+1: arr.length+1
+	})
+}
+
 var sectionFeatures; // This is now a global variable!
 function sectionChart(data) {
 
-    console.log('Doing Section Overview plot')
+    console.log('Doing Section Overview plot');
 
-    var svg = d3.select('#scatter-plot').select("svg")
+    var svg = d3.select('#scatter-plot').select("svg");
     if (svg.select('#sectionChartGroup').empty()) {
         sectionFeatures = section()
     }
 
     svg = sectionFeatures.svg;
 
-    var managedData = dataManager(sectionFeatures, data)
+    var managedData = dataManager(sectionFeatures, data);
+    var countsPerIdentifiedType = d3.nest()
+        .key(function (d) {
+            return d.IdentifiedType
+        })
+        .rollup(function (leaves) {
+            return leaves.length
+        })
+        .entries(managedData);
+    // updateManagedData(managedData, countsPerIdentifiedType);
 
     //update now data with a managedData property
     for (var i = 0; i < data.length; ++i) {
@@ -282,15 +339,14 @@ function sectionChart(data) {
 
     function updateScales() {
         var extent = getExtent();
-
-        sectionFeatures.scale.x.domain([extent.x[0] * 0.99, extent.x[1] * 1.01]).nice()
-        sectionFeatures.scale.y.domain([extent.y[0] * 0.99, extent.y[1] * 1.01]).nice()
+        sectionFeatures.scale.x.domain([extent.x[0], extent.x[1]]).nice();
+        sectionFeatures.scale.y.domain([extent.y[0], extent.y[1]]).nice();
     }
 
     var gridlines = {
         x: d3.axisBottom(sectionFeatures.scale.x).tickFormat("").tickSize(sectionFeatures.height),
         y: d3.axisLeft(sectionFeatures.scale.y).tickFormat("").tickSize(-sectionFeatures.width),
-    }
+    };
 
     function updateGridlines() {
         sectionFeatures.xGrid.call(gridlines.x);
@@ -313,7 +369,7 @@ function sectionChart(data) {
         // should be rendered last. Especially when using filters on the section chart you need to guarantee
         // that these are drawn at very end, otherwise they wont work properly.
         // Draw the highlight circle
-        d3.select('#dotsGroup').select('.highlight-circle').remove()
+        d3.select('#dotsGroup').select('.highlight-circle').remove();
         if (d3.select('#dotsGroup').select('.highlight-circle').empty()){
             sectionFeatures.dotsGroup
                             .append('circle')
@@ -326,7 +382,7 @@ function sectionChart(data) {
             .attr('r', sectionFeatures.pointRadius * 2);
 
         // Now draw the overlay on top of everything to take the mouse events
-        d3.select('#dotsGroup').select('#sectionOverlay').remove()
+        d3.select('#dotsGroup').select('#sectionOverlay').remove();
         if (d3.select('#dotsGroup').select('#sectionOverlay').empty()){
             sectionFeatures.dotsGroup
                             .append('rect')
@@ -347,7 +403,7 @@ function sectionChart(data) {
         d3.select('#dotsGroup')
             .select('#sectionOverlay')
             .attr('width', sectionFeatures.width)
-            .attr('height', sectionFeatures.height)
+            .attr('height', sectionFeatures.height);
 
         //Finally return the voronoi
         return v
@@ -358,28 +414,13 @@ function sectionChart(data) {
     updateGridlines();
 
     svg.select('.y.axis')
-        .attr("transform", "translate(" + sectionFeatures.pointRadius + " 0)")
+        //.attr("transform", "translate(" + sectionFeatures.pointRadius + " 0)")
         .call(sectionFeatures.axis.y);
 
-    var h = sectionFeatures.height + sectionFeatures.pointRadius;
+    var h = sectionFeatures.height;
     svg.select('.x.axis')
         .attr("transform", "translate(0, " + h + ")")
         .call(sectionFeatures.axis.x);
-
-    // var xGrid = svg.append("g")
-    //     .attr("class", "grid")
-    //     .call(sectionFeatures.gridlines.x);
-    //
-    // var yGrid = svg.append("g")
-    //     .attr("class", "grid")
-    //     .call(sectionFeatures.gridlines.y);
-
-    // var dotsGroup = svg.append("g")
-    //     .attr("clip-path", "url(#clip)")
-    //     .attr("transform", "translate(4, 0)") // no idea why!
-    //     .append("g");
-
-    var dotsGroup = sectionFeatures.dotsGroup;
 
 
     // Do the chart
@@ -388,6 +429,7 @@ function sectionChart(data) {
     // because it will carry the styling from the highlight-circle
     // That styling is set to:
     // style="stroke: tomato; display: none;"
+    var dotsGroup = sectionFeatures.dotsGroup;
     var update = dotsGroup.selectAll(".dotOnScatter").data(data);
 
     // Note: Setting the transition here messes up the landing cell
@@ -408,15 +450,15 @@ function sectionChart(data) {
         .attr('cx', d => sectionFeatures.scale.x(d.x))
         .attr('cy', d => sectionFeatures.scale.y(d.y))
         .attr('fill', d => d.managedData.color)
-        .attr('fill-opacity', 0.85)
+        .attr('fill-opacity', 0.85);
 
     update.exit().remove();
 
     //
-    d3.select('#dotsGroup').select('.highlight-rect').remove()
+    d3.select('#dotsGroup').select('.highlight-rect').remove();
     if (d3.select('#dotsGroup').select('.highlight-rect').empty()){
         dotsGroup.append('rect').attr('class', 'highlight-rect')
-    };
+    }
 
     var voronoiDiagram = updateVoronoi(data);
 
@@ -445,6 +487,21 @@ function sectionChart(data) {
         dotsGroup.attr("transform", d3.event.transform);
         // xGrid.attr("transform", d3.event.transform);
         // yGrid.attr("transform", d3.event.transform);
+
+
+        // The loop below goes over all circles and set the radius to a new value that will negate the zoom effect.
+        // Hence despite zooming-in or out the circles will keep the same size on the screen
+        // The same workaround has to be applied for the highlighting circle and the rect (the rect is raised by the dapi.js)
+        var zoomLevel = d3.event.transform.k;
+        var nodes = d3.selectAll('circle').nodes();
+        for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].getAttribute('class') === 'dotOnScatter') {
+                var rd = Math.sqrt(config.cellData[i].managedData.GeneCountTotal);
+                nodes[i].setAttribute('r', rd / d3.event.transform.k)
+            }
+        }
+        // finally update the zoomLevel property.
+        sectionFeatures.zoomLevel = zoomLevel
     }
 
 // callback for when the mouse moves across the overlay
@@ -453,7 +510,7 @@ function sectionChart(data) {
         d3.select('.highlight-rect')
             .attr("width", 0)
             .attr("height",0)
-            .attr('opacity', 0)
+            .attr('opacity', 0);
 
         // get the current mouse position
         const [mx, my] = d3.mouse(this);
@@ -499,8 +556,8 @@ function sectionChart(data) {
 
 // callback for when the mouse moves across the overlay
     function mouseClickHandler() {
-        console.log('pageX is: ' + d3.event.pageX)
-        console.log('pageY is: ' + d3.event.pageY)
+        console.log('pageX is: ' + d3.event.pageX);
+        console.log('pageY is: ' + d3.event.pageY);
 
         // get the current mouse position
         const [mx, my] = d3.mouse(this);
@@ -514,7 +571,7 @@ function sectionChart(data) {
         highlight(site && site.data);
 
         // 2.
-        updateDashboard(site && site.data)
+        updateDashboard(site && site.data);
 
         // 3.
         drawMarker(site && site.data)
@@ -559,12 +616,13 @@ function sectionChart(data) {
                 d3.select('.highlight-circle')
                     .style('display', '')
                     .style('stroke', 'tomato')
+                    .style('stroke-width', 1/sectionFeatures.zoomLevel)
                     .attr('fill', d.managedData.color)
                     .attr('cx', sectionFeatures.scale.x(d.x))
                     .attr('cy', sectionFeatures.scale.y(d.y))
-                    .attr("r", 1.2 * Math.sqrt(d.managedData.GeneCountTotal));
+                    .attr("r", 1.2 * Math.sqrt(d.managedData.GeneCountTotal) / sectionFeatures.zoomLevel ); // increase circle by 20% when highlighted
 
-                // If event has be triggered from the scatter chart, so a tooltip
+                // If event has been triggered from the scatter chart, do a tooltip
                 if (d3.event && d3.event.pageX) {
 
                     var myHtml = '<h4 style="margin-top:0px; margin-bottom:1px"><b>' + d.managedData.IdentifiedType + '</b></h4>' +
@@ -579,10 +637,10 @@ function sectionChart(data) {
                         '<td><div>' + Math.round(100 * d.managedData.GeneCountTotal) / 100 + '</div></td>' +
                         '</tr>' +
                         '</tbody>' +
-                        '</table>'
+                        '</table>';
 
                     sectionFeatures.tooltip.transition()
-                        .duration(200)
+                        .duration(200);
 
                     sectionFeatures.tooltip
                         .style("opacity", .9)
@@ -598,7 +656,7 @@ function sectionChart(data) {
 
 
     // use that to check counts per IdentifiedType and then set the renderOrder in such a manner that
-    // names which smaller counts (ie rarer) will be rendered on top of more frequent ones
+    // names with smaller counts (ie rarer) will be rendered on top of more frequent ones
     var countData = d3.nest()
         .key(function (d) {
             return d.managedData.IdentifiedType
@@ -606,9 +664,8 @@ function sectionChart(data) {
         .rollup(function (leaves) {
             return leaves.length
         })
-        .entries(data)
+        .entries(data);
 
-    console.log('Finished Section Overview plot')
+    console.log('Finished Section Overview plot');
     return data
 }
-
