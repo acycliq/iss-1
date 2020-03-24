@@ -1,6 +1,6 @@
 function dapi(config) {
 
-    var img = config.imageSize;
+    var img = [config.imageSize.width, config.imageSize.height];
     // var img = [
     //     65536, // original width of image
     //     47168 // original height of image
