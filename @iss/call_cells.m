@@ -192,6 +192,17 @@ for i=1:o.CellCallMaxIter
     
     %% diagnostics
     if ~isempty(o.CellCallShowCenter) && (Converged || o.Graphics==2 || i==o.CellCallMaxIter)
+        cellCallData.GeneNames = GeneNames;
+        cellCallData.ClassNames = ClassNames; 
+        cellCallData.IncludeSpot = IncludeSpot;
+        cellCallData.pCellClass = pCellClass;
+        cellCallData.CellGeneCount = CellGeneCount;
+        cellCallData.Neighbors = Neighbors;
+        cellCallData.pSpotNeighb = pSpotNeighb;
+        
+        img = 'D:\background_boundaries.tif';
+        startViewer(o, img, cellCallData)
+        
         figure(3985471)
         
         % create a new object to do the plotting in our local coordinate
