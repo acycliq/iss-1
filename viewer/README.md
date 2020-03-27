@@ -10,7 +10,7 @@ A matlab object of type `iss` is needed. This has to be obtained outside the vie
 
 
 ### Installing
-No extra dependencies are needed (apart from Matlab). Everything is portable and should work as is.
+No extra dependencies are needed (apart from Matlab and Java). Everything is portable and should work as is.
 
 
 ### Running the viewer
