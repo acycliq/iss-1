@@ -200,7 +200,7 @@ for i=1:o.CellCallMaxIter
         cellCallData.Neighbors = Neighbors;
         cellCallData.pSpotNeighb = pSpotNeighb;
         
-        img = 'D:\background_boundaries.tif';
+        img = './cachedData/background_boundaries.tif';
         startViewer(o, img, cellCallData)
         
         figure(3985471)
