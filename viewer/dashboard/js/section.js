@@ -655,6 +655,16 @@ function sectionChart(data) {
     }
 
 
+    // Populate the check boxes labels
+    var colorSet = [...new Set(classColorsCodes().map(d => d.color))];
+    idLabels = sectionChartFilters.querySelectorAll('tbody>tr>td[id]');
+    for (var i = 0; i < colorSet.length; i++ ) {
+        var color = colorSet[i],
+            cbLabel = classColorsCodes().filter(d=>d.color===color).map(d=>d.IdentifiedType);
+        $(idLabels[i]).text(cbLabel[0])
+    }
+
+
     // use that to check counts per IdentifiedType and then set the renderOrder in such a manner that
     // names with smaller counts (ie rarer) will be rendered on top of more frequent ones
     var countData = d3.nest()

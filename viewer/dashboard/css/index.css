@@ -410,10 +410,16 @@ table.sectionChartControls td {
     margin: 0px;
 }
 
-.checkBoxLabel {
+.checkBoxRightCol {
     padding-left: 10px;
     padding-right: 0px;
 }
+
+.scaled {
+  transform: scale(0.9); /* Equal to scaleX(0.7) scaleY(0.7) */
+  background-color: pink;
+}
+
 
 table.no-spacing {
     border-spacing: 0; /* Removes the cell spacing via CSS */
