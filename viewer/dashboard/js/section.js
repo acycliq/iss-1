@@ -496,7 +496,7 @@ function sectionChart(data) {
         var nodes = d3.selectAll('circle').nodes();
         for (var i = 0; i < nodes.length; i++) {
             if (nodes[i].getAttribute('class') === 'dotOnScatter') {
-                var rd = Math.sqrt(cellData[i].managedData.GeneCountTotal);
+                var rd = Math.sqrt(data[i].managedData.GeneCountTotal);
                 nodes[i].setAttribute('r', rd / d3.event.transform.k)
             }
         }
