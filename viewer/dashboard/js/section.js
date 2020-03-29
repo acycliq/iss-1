@@ -656,12 +656,22 @@ function sectionChart(data) {
 
 
     // Populate the check boxes labels
+    // i think I can actually add the dom elements (checkboxes and labels) dynamically. To investigate
+    // For now I have hardcoded the checkboxes in the index.html
     var colorSet = [...new Set(classColorsCodes().map(d => d.color))];
     idLabels = sectionChartFilters.querySelectorAll('tbody>tr>td[id]');
     for (var i = 0; i < colorSet.length; i++ ) {
         var color = colorSet[i],
             cbLabel = classColorsCodes().filter(d=>d.color===color).map(d=>d.IdentifiedType);
-        $(idLabels[i]).text(cbLabel[0])
+        if (cbLabel != 'Other') {
+            $(idLabels[i]).text(cbLabel[0])
+        }
+        else
+        {
+            // Hide the checkbox if label='Other'
+            var cb_id = '#cb' + i;
+            $(cb_id).hide()
+        }
     }
 
 

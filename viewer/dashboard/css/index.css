@@ -415,9 +415,13 @@ table.sectionChartControls td {
     padding-right: 0px;
 }
 
+.checkBoxLeftCol {
+    /*no styling for this*/
+}
+
 .scaled {
-  transform: scale(0.9); /* Equal to scaleX(0.7) scaleY(0.7) */
-  background-color: pink;
+  transform: scale(0.9);
+  /*background-color: #646464;*/
 }
 
 

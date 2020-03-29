@@ -93,7 +93,9 @@ function getSelected(inputs) {
     for (var i = 0; i < inputs.length; i++) {
         if (inputs[i].checked) {
             var cb_text = $("#cb"+i+"_text").text();
-            selected.push(cb_text);
+            if (cb_text != 'Other') {
+                selected.push(cb_text);
+            }
         }
     }
     return selected
